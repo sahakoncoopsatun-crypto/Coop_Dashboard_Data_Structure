@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบรายงานผลแดชบอร์ดเรียลไทม์ - สหกรณ์ออมทรัพย์</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Prompt & Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse CDN for parsing live Google Sheets CSV data -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            dark: '#0d1b2a'
+                        },
+                        coop: {
+                            purple: '#4c1d95',
+                            gold: '#d97706',
+                            blue: '#2563eb',
+                            green: '#059669',
+                            cardBg: '#1e293b'
+                        }
+                    },
+                    fontFamily: {
+                        prompt: ['Prompt', 'sans-serif'],
+                        sarabun: ['Sarabun', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        h1, h2, h3, h4, .font-prompt {
+            font-family: 'Prompt', sans-serif;
+        }
+
+        /* Print CSS Styles for Perfect PDF Export */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            .dashboard-card {
+                background-color: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+            }
+            .text-white, .text-slate-200, .text-slate-300 {
+                color: #000000 !important;
+            }
+            .bg-navy-900, .bg-slate-800, .bg-slate-900 {
+                background-color: #f8fafc !important;
+            }
+            .pdf-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+        }
+
+        /* Light Mode High-Contrast Overrides */
+        body.light-mode {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .bg-slate-900,
+        body.light-mode .bg-slate-950,
+        body.light-mode header.bg-slate-900 {
+            background-color: #ffffff !important;
+        }
+        body.light-mode .dashboard-card {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+        }
+        body.light-mode .border-slate-700,
+        body.light-mode .border-slate-800,
+        body.light-mode .border-slate-700\/80,
+        body.light-mode .border-slate-700\/50,
+        body.light-mode header.border-slate-800 {
+            border-color: #cbd5e1 !important;
+        }
+        
+        /* Ensure dark text inside light dashboard cards */
+        body.light-mode .dashboard-card .text-white,
+        body.light-mode .dashboard-card .text-slate-200 {
+            color: #0f172a !important;
+        }
+        body.light-mode .dashboard-card .text-slate-300 {
+            color: #334155 !important;
+        }
+        body.light-mode .dashboard-card .text-slate-400 {
+            color: #475569 !important;
+        }
+        
+        /* Preserve Crisp Bright Text Inside Dark Banner Card */
+        body.light-mode .banner-card {
+            background: linear-gradient(to right, #2e1065, #1e1b4b, #0f172a) !important;
+            border-color: #581c87 !important;
+        }
+        body.light-mode .banner-card .text-white,
+        .banner-card .text-white {
+            color: #ffffff !important;
+        }
+        body.light-mode .banner-card .text-slate-200,
+        .banner-card .text-slate-200 {
+            color: #f1f5f9 !important;
+        }
+        body.light-mode .banner-card .text-slate-300,
+        .banner-card .text-slate-300 {
+            color: #cbd5e1 !important;
+        }
+        body.light-mode .banner-card .text-amber-400,
+        .banner-card .text-amber-400 {
+            color: #fbbf24 !important;
+        }
+        body.light-mode .banner-card .text-purple-300,
+        .banner-card .text-purple-300 {
+            color: #d8b4fe !important;
+        }
+        body.light-mode .banner-card .text-purple-200,
+        .banner-card .text-purple-200 {
+            color: #e9d5ff !important;
+        }
+        body.light-mode .banner-card .text-emerald-300,
+        .banner-card .text-emerald-300 {
+            color: #6ee7b7 !important;
+        }
+
+        /* Light Mode Header Bar & Selects */
+        body.light-mode select.text-white {
+            color: #0f172a !important;
+        }
+        body.light-mode select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .bg-slate-800 {
+            background-color: #f1f5f9 !important;
+        }
+        body.light-mode .bg-slate-900\/60,
+        body.light-mode .bg-slate-900\/70,
+        body.light-mode .bg-slate-900\/80,
+        body.light-mode .bg-slate-900\/90 {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+        
+        /* Light Mode High Contrast Numbers */
+        body.light-mode .text-amber-400, body.light-mode .text-amber-500 { color: #b45309 !important; }
+        body.light-mode .text-emerald-400 { color: #047857 !important; }
+        body.light-mode .text-blue-400 { color: #1d4ed8 !important; }
+        body.light-mode .text-sky-400 { color: #0369a1 !important; }
+        body.light-mode .text-purple-400 { color: #7e22ce !important; }
+        
+        /* Table Light Mode Adjustments */
+        body.light-mode table th { color: #0f172a !important; }
+        body.light-mode .bg-slate-900, body.light-mode .bg-slate-950 { background-color: #f1f5f9 !important; color: #0f172a !important; }
+        body.light-mode .bg-indigo-950, body.light-mode .bg-indigo-950\/40, body.light-mode .bg-indigo-950\/80 { background-color: #e0e7ff !important; color: #1e3a8a !important; }
+        body.light-mode .bg-indigo-900, body.light-mode .bg-indigo-900\/60 { background-color: #c7d2fe !important; color: #1e3a8a !important; }
+        
+        body.light-mode .divide-slate-700\/50 > :not([hidden]) ~ :not([hidden]),
+        body.light-mode .divide-slate-700\/60 > :not([hidden]) ~ :not([hidden]),
+        body.light-mode .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+            border-color: #cbd5e1 !important;
+        }
+        
+        body.light-mode tr.hover\:bg-slate-700\/30:hover { background-color: #f1f5f9 !important; }
+        body.light-mode .bg-purple-950\/60, body.light-mode .bg-purple-950\/30, body.light-mode .bg-purple-950\/20,
+        body.light-mode .bg-purple-950\/40, body.light-mode .bg-purple-950\/70 {
+            background-color: #f3e8ff !important;
+            color: #581c87 !important;
+        }
+        body.light-mode #profitAllocTableBody tr td { color: #0f172a !important; }
+        body.light-mode input.bg-slate-800, body.light-mode input.bg-slate-900 {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Top Control / Filter Bar (No Print) -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 no-print shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-slate-900 font-bold text-xl">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold font-prompt text-white leading-tight">ระบบแดชบอร์ดสหกรณ์ (Real-time Sync)</h1>
+                    <p class="text-xs text-amber-400">เชื่อมโยงข้อมูลจาก Google Sheets ออกรายงานรายเดือน & สิ้นปี</p>
+                </div>
+            </div>
+
+            <!-- Filters & Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Select Month -->
+                <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
+                    <i class="fa-regular fa-calendar-check text-amber-400"></i>
+                    <label class="text-xs font-medium text-slate-300">งวดรายงาน:</label>
+                    <select id="monthSelect" onchange="updateDashboard()" class="bg-transparent text-sm font-prompt text-white focus:outline-none cursor-pointer">
+                        <option value="6" class="bg-slate-800 text-white">ประจำเดือน มิถุนายน</option>
+                        <option value="1" class="bg-slate-800 text-white">ประจำเดือน มกราคม</option>
+                        <option value="2" class="bg-slate-800 text-white">ประจำเดือน กุมภาพันธ์</option>
+                        <option value="3" class="bg-slate-800 text-white">ประจำเดือน มีนาคม</option>
+                        <option value="4" class="bg-slate-800 text-white">ประจำเดือน เมษายน</option>
+                        <option value="5" class="bg-slate-800 text-white">ประจำเดือน พฤษภาคม</option>
+                        <option value="7" class="bg-slate-800 text-white">ประจำเดือน กรกฎาคม</option>
+                        <option value="8" class="bg-slate-800 text-white">ประจำเดือน สิงหาคม</option>
+                        <option value="9" class="bg-slate-800 text-white">ประจำเดือน กันยายน</option>
+                        <option value="10" class="bg-slate-800 text-white">ประจำเดือน ตุลาคม</option>
+                        <option value="11" class="bg-slate-800 text-white">ประจำเดือน พฤศจิกายน</option>
+                        <option value="12" class="bg-slate-800 text-white">ประจำเดือน ธันวาคม</option>
+                        <option value="YEAREND" class="bg-amber-600 text-white font-bold">★ สรุปภาพรวม ณ สิ้นปี</option>
+                    </select>
+                </div>
+
+                <!-- Select Year -->
+                <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
+                    <label class="text-xs font-medium text-slate-300">ปี พ.ศ.:</label>
+                    <select id="yearSelect" onchange="updateDashboard()" class="bg-transparent text-sm font-prompt text-white focus:outline-none cursor-pointer">
+                        <option value="2569" class="bg-slate-800">2569</option>
+                        <option value="2568" class="bg-slate-800">2568</option>
+                    </select>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-prompt text-xs w-9 h-9 rounded-lg transition duration-200 flex items-center justify-center shadow-md" title="เปลี่ยนพื้นหลัง สว่าง/มืด">
+                    <i class="fa-solid fa-sun text-lg"></i>
+                </button>
+
+                <!-- Live Sync Button -->
+                <button onclick="fetchLiveGoogleSheetData()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-2 shadow-md" title="ดึงข้อมูลล่าสุดจาก Google Sheet ลิงก์ของคุณทันที">
+                    <i class="fa-solid fa-arrows-rotate" id="syncIcon"></i>
+                    <span>ดึงข้อมูล Real-time จาก Sheet</span>
+                </button>
+
+                <!-- Open Sheet Modal Button -->
+                <button onclick="openSheetModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-2 shadow-md">
+                    <i class="fa-solid fa-gear text-amber-400"></i>
+                    <span>ตั้งค่า / แก้ไขข้อมูล</span>
+                </button>
+
+                <!-- Export PDF Button -->
+                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-prompt font-semibold text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-2 shadow-md">
+                    <i class="fa-solid fa-file-pdf text-sm"></i>
+                    <span>พิมพ์รายงาน / PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container (Infographic Layout) -->
+    <main class="max-w-7xl mx-auto px-4 pt-6 pdf-container">
+        
+        <!-- Dashboard Banner Header -->
+        <div class="banner-card bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-2xl p-6 mb-6 shadow-2xl border border-purple-800/40 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-white">
+                <i class="fa-solid fa-building-columns text-[200px]"></i>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-purple-950/80 border border-purple-500/40 text-purple-200 text-xs px-3 py-1.5 rounded-full mb-2 shadow">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="realtimeStatus" class="font-medium text-purple-200">สถานะ: เชื่อมต่อ Google Sheet ID: 10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU</span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold font-prompt text-white tracking-wide drop-shadow-md">
+                        สรุปผลการดำเนินงาน สหกรณ์ออมทรัพย์
+                    </h2>
+                    <p class="text-amber-400 font-prompt text-lg font-semibold mt-1 drop-shadow" id="displayPeriod">
+                        ประจำเดือนมิถุนายน 2569
+                    </p>
+                </div>
+                <div class="text-right border-l-0 md:border-l border-purple-700/50 pl-0 md:pl-6">
+                    <a id="sheetLinkBtn" href="https://docs.google.com/spreadsheets/d/10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU/edit?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white font-semibold px-3.5 py-1.5 rounded-lg mb-2 transition shadow">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>เปิดไฟล์ Google Sheet ต้นทาง</span>
+                        <i class="fa-solid fa-up-right-from-square text-[10px]"></i>
+                    </a>
+                    <p class="text-xs text-slate-300">วิสัยทัศน์สหกรณ์:</p>
+                    <p class="text-sm font-medium text-purple-200 italic mt-0.5 drop-shadow-sm">" สหกรณ์มั่นคง ธรรมาภิบาล บริหารโปร่งใส ทันสมัยด้วยเทคโนโลยี "</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid Section 1: Financial Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            
+            <!-- Card 1: Financial Position -->
+            <div class="dashboard-card bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-700/80 pb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center">
+                            <i class="fa-solid fa-vault text-lg"></i>
+                        </div>
+                        <h3 class="font-prompt font-semibold text-lg text-white">1. ฐานะทางการเงินของสหกรณ์</h3>
+                    </div>
+                    <span class="text-xs text-slate-400 font-mono">หน่วย: บาท</span>
+                </div>
+                
+                <div class="h-64 w-full relative">
+                    <canvas id="financialChart"></canvas>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-700 text-center text-xs">
+                    <div class="bg-slate-900/60 p-2 rounded-lg">
+                        <p class="text-slate-400 mb-1">สินทรัพย์รวม</p>
+                        <p class="font-bold text-blue-400 text-xs md:text-sm font-mono" id="valAssets">7,139,892,291.14</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-2 rounded-lg">
+                        <p class="text-slate-400 mb-1">หนี้สินรวม</p>
+                        <p class="font-bold text-amber-500 text-xs md:text-sm font-mono" id="valLiabilities">4,641,732,122.17</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-2 rounded-lg">
+                        <p class="text-slate-400 mb-1">ทุนรวม</p>
+                        <p class="font-bold text-emerald-400 text-xs md:text-sm font-mono" id="valEquity">2,390,010,729.84</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Revenue, Expense, Net Profit -->
+            <div class="dashboard-card bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-700/80 pb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-chart-pie text-lg"></i>
+                        </div>
+                        <h3 class="font-prompt font-semibold text-lg text-white">2. รายได้ ค่าใช้จ่าย และกำไรสุทธิ</h3>
+                    </div>
+                    <span class="text-xs text-slate-400 font-mono">หน่วย: บาท</span>
+                </div>
+
+                <div class="h-64 w-full relative">
+                    <canvas id="profitChart"></canvas>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-700 text-center text-xs">
+                    <div class="bg-slate-900/60 p-2 rounded-lg">
+                        <p class="text-slate-400 mb-1">รายได้รวม</p>
+                        <p class="font-bold text-emerald-400 text-xs md:text-sm font-mono" id="valRevenue">182,499,967.10</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-2 rounded-lg">
+                        <p class="text-slate-400 mb-1">ค่าใช้จ่ายรวม</p>
+                        <p class="font-bold text-sky-400 text-xs md:text-sm font-mono" id="valExpenses">74,350,527.97</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-2 rounded-lg">
+                        <p class="text-slate-400 mb-1">กำไรสุทธิ</p>
+                        <p class="font-bold text-purple-400 text-xs md:text-sm font-mono" id="valNetProfit">108,149,439.13</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Dashboard Grid Section 2: Members & Fund Allocation Percentage -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+            
+            <!-- Card 3: Member Summary (5 cols) -->
+            <div class="lg:col-span-5 dashboard-card bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-700/80 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+                                <i class="fa-solid fa-users text-lg"></i>
+                            </div>
+                            <h3 class="font-prompt font-semibold text-lg text-white">3. สมาชิกคงเหลือ</h3>
+                        </div>
+                        <span class="text-xs bg-indigo-900/60 text-indigo-300 border border-indigo-700 px-2.5 py-1 rounded-full font-mono">
+                            รวมทั้งสิ้น <span id="valTotalMember" class="font-bold text-amber-400">4,164</span> คน
+                        </span>
+                    </div>
+
+                    <div class="overflow-x-auto my-2">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead>
+                                <tr class="bg-indigo-950 text-indigo-200 border-b border-indigo-800">
+                                    <th class="p-2.5 font-prompt">ประเภทสมาชิก</th>
+                                    <th class="p-2.5 text-center font-prompt">ชาย</th>
+                                    <th class="p-2.5 text-center font-prompt">หญิง</th>
+                                    <th class="p-2.5 text-center font-prompt bg-indigo-900">รวม</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700/60 text-slate-200">
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="p-2.5 font-medium flex items-center space-x-2">
+                                        <i class="fa-solid fa-user-check text-indigo-400 text-xs"></i>
+                                        <span>สมาชิกสามัญ</span>
+                                    </td>
+                                    <td class="p-2.5 text-center font-mono" id="memRegMale">646</td>
+                                    <td class="p-2.5 text-center font-mono" id="memRegFemale">2,665</td>
+                                    <td class="p-2.5 text-center font-bold font-mono text-purple-300 bg-indigo-950/40" id="memRegTotal">3,311</td>
+                                </tr>
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="p-2.5 font-medium flex items-center space-x-2">
+                                        <i class="fa-solid fa-user-plus text-sky-400 text-xs"></i>
+                                        <span>สมาชิกสมทบ</span>
+                                    </td>
+                                    <td class="p-2.5 text-center font-mono" id="memAssocMale">488</td>
+                                    <td class="p-2.5 text-center font-mono" id="memAssocFemale">365</td>
+                                    <td class="p-2.5 text-center font-bold font-mono text-purple-300 bg-indigo-950/40" id="memAssocTotal">853</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-slate-900 font-bold border-t-2 border-indigo-500 text-white">
+                                    <td class="p-2.5">รวมทั้งหมด</td>
+                                    <td class="p-2.5 text-center font-mono text-indigo-300" id="memTotalMale">1,134</td>
+                                    <td class="p-2.5 text-center font-mono text-pink-300" id="memTotalFemale">3,030</td>
+                                    <td class="p-2.5 text-center font-mono text-amber-400 text-base bg-indigo-900" id="memGrandTotal">4,164</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/50 mt-3 flex items-center justify-between text-xs text-slate-300">
+                    <span><i class="fa-solid fa-circle-info text-amber-400 mr-1"></i> สัดส่วนเพศหญิงต่อชาย:</span>
+                    <span class="font-bold text-amber-400 font-mono" id="genderRatio">72.8% : 27.2%</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Fund Usage & Percentage Report (7 cols) -->
+            <div class="lg:col-span-7 dashboard-card bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-700/80 pb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-purple-600/20 text-purple-400 flex items-center justify-center">
+                            <i class="fa-solid fa-piggy-bank text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-prompt font-semibold text-lg text-white">4. การใช้ทุนสะสมตามข้อบังคับ (รายงานร้อยละ %)</h3>
+                            <p class="text-xs text-slate-400">คำนวณสัดส่วนจาก ยอดยกมา - ทุนใช้ไป - ร้อยละการใช้ทุนคงเหลือ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fund Doughnut Chart & Detail Table Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    
+                    <!-- Doughnut Chart (5 cols) -->
+                    <div class="md:col-span-5 h-56 relative flex items-center justify-center">
+                        <canvas id="fundDoughnutChart"></canvas>
+                    </div>
+
+                    <!-- Fund Usage Detail List (7 cols) -->
+                    <div class="md:col-span-7 space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs">
+                        <div id="fundListContainer">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Total Funds Summary Footer -->
+                <div class="mt-4 pt-3 border-t border-slate-700 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="bg-slate-900/70 p-2 rounded-lg">
+                        <span class="text-slate-400">ทุนสะสมยกมารวม:</span>
+                        <p class="font-bold text-white font-mono text-sm mt-0.5" id="totalBroughtForward">1,059,210.53</p>
+                    </div>
+                    <div class="bg-slate-900/70 p-2 rounded-lg">
+                        <span class="text-slate-400">ทุนสะสมใช้ไปรวม:</span>
+                        <p class="font-bold text-amber-400 font-mono text-sm mt-0.5" id="totalFundUsed">1,058,185.00</p>
+                    </div>
+                    <div class="bg-purple-950/70 border border-purple-800 p-2 rounded-lg">
+                        <span class="text-purple-300 font-semibold">ร้อยละการใช้ทุนรวม:</span>
+                        <p class="font-bold text-emerald-400 font-mono text-sm mt-0.5" id="totalFundPercent">99.90%</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Section 3: Profit Allocation Table (Annual Comparison) -->
+        <div class="dashboard-card bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl mb-6">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-700/80 pb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-lg bg-amber-600/20 text-amber-400 flex items-center justify-center">
+                        <i class="fa-solid fa-scale-balanced text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-prompt font-semibold text-lg text-white">5. ตารางแผนจัดสรรกำไรสุทธิประจำปี (Net Profit Allocation)</h3>
+                        <p class="text-xs text-slate-400">เปรียบเทียบวงเงินจัดสรรและคำนวณสัดส่วนร้อยละ (%) ตาม พ.ร.บ. สหกรณ์</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-slate-200 border-b border-slate-700">
+                            <th class="p-3 font-prompt text-sm">รายการจัดสรรกำไรสุทธิ</th>
+                            <th class="p-3 text-right font-prompt text-sm bg-slate-800/80">ปี 2568 (บาท)</th>
+                            <th class="p-3 text-center font-prompt text-sm bg-purple-950/60 text-purple-300">ร้อยละ (%)</th>
+                            <th class="p-3 text-right font-prompt text-sm bg-slate-800/80">ปี 2567 (บาท)</th>
+                            <th class="p-3 text-center font-prompt text-sm bg-purple-950/60 text-purple-300">ร้อยละ (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50 text-slate-200" id="profitAllocTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Live Google Sheet Data Editor (Real-time Simulation) -->
+    <div id="sheetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+            
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950 rounded-t-2xl">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-table-cells text-emerald-400 text-xl"></i>
+                    <div>
+                        <h3 class="font-prompt font-bold text-white text-base">Google Sheet Live Editor (จำลองตารางป้อนข้อมูล)</h3>
+                        <p class="text-xs text-slate-400">ปรับเปลี่ยนตัวเลข "ทุนยกมา" หรือ "ทุนใช้ไป" แดชบอร์ดจะคำนวณ % และอัปเดตเรียลไทม์ทันที</p>
+                    </div>
+                </div>
+                <button onclick="closeSheetModal()" class="text-slate-400 hover:text-white text-lg px-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-6 flex-1 text-xs">
+                
+                <!-- Section 0: Google Sheet ID Setting -->
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <label class="text-amber-400 font-prompt font-semibold text-xs block mb-1">
+                        <i class="fa-solid fa-link mr-1"></i> Google Sheet ID หรือ URL ลิงก์ที่เชื่อมต่อ:
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" id="sheetUrlInput" value="10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU" class="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500">
+                        <button onclick="updateSheetIdFromInput()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-3 py-2 rounded text-xs transition">
+                            อัปเดตลิงก์
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">
+                        * หมายเหตุ: ไฟล์ Google Sheet ต้องตั้งค่าสิทธิ์แชร์เป็น <strong>"ทุกคนที่มีลิงก์สามารถดูได้" (Anyone with link can view)</strong> เพื่อให้ระบบดึงข้อมูลเรียลไทม์ได้
+                    </p>
+                </div>
+
+                <!-- Section A: Edit Financials -->
+                <div>
+                    <h4 class="font-prompt font-semibold text-amber-400 text-sm mb-3 flex items-center">
+                        <i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูลตัวเลขทางการเงินประจำเดือน
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-slate-400 block mb-1">สินทรัพย์รวม (บาท)</label>
+                            <input type="number" id="inputAssets" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">หนี้สินรวม (บาท)</label>
+                            <input type="number" id="inputLiabilities" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">ทุนรวม (บาท)</label>
+                            <input type="number" id="inputEquity" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">รายได้รวม (บาท)</label>
+                            <input type="number" id="inputRevenue" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">ค่าใช้จ่ายรวม (บาท)</label>
+                            <input type="number" id="inputExpenses" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section B: Edit Fund Data -->
+                <div>
+                    <h4 class="font-prompt font-semibold text-purple-400 text-sm mb-3 flex items-center">
+                        <i class="fa-solid fa-hand-holding-dollar mr-2"></i> แก้ไขข้อมูลกองทุนสะสม (ทุนยกมา & ทุนใช้ไป)
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-300">
+                                    <th class="p-2 text-left">ชื่อกองทุน</th>
+                                    <th class="p-2 text-right">ทุนสะสมยกมา (บาท)</th>
+                                    <th class="p-2 text-right">ทุนสะสมใช้ไป (บาท)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inputFundTableBody" class="divide-y divide-slate-800">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-950 rounded-b-2xl flex justify-end space-x-3">
+                <button onclick="closeSheetModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-prompt text-xs">
+                    ยกเลิก
+                </button>
+                <button onclick="saveLiveSheetData()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-prompt font-semibold text-xs flex items-center space-x-2">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>บันทึก & ซิงค์ข้อมูล Real-time</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Google Sheet Integration Config
+        let currentSheetId = "10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU";
+
+        // Database simulation and live storage
+        const dbData = {
+            monthly: {
+                6: {
+                    monthName: "มิถุนายน",
+                    assets: 7139892291.14,
+                    liabilities: 4641732122.17,
+                    equity: 2390010729.84,
+                    revenue: 182499967.10,
+                    expenses: 74350527.97,
+                    netProfit: 108149439.13,
+                    members: {
+                        regMale: 646, regFemale: 2665,
+                        assocMale: 488, assocFemale: 365
+                    },
+                    funds: [
+                        { name: "ทุนส่งเสริมการศึกษาบุตรสมาชิก", brought: 1059210.53, used: 805000.00, color: "#2563eb" },
+                        { name: "ทุนเพื่อพัฒนากิจการ", brought: 1088888.89, used: 98000.00, color: "#d97706" },
+                        { name: "ทุนสวัสดิการแก่สมาชิกและครอบครัว", brought: 1155000.00, used: 46200.00, color: "#059669" },
+                        { name: "ทุนสวัสดิการกรณีรักษาพยาบาล", brought: 1120000.00, used: 33600.00, color: "#9333ea" },
+                        { name: "ทุนเพื่อการศึกษาอบรมทางสหกรณ์", brought: 1013705.88, used: 34466.00, color: "#0284c7" },
+                        { name: "ทุนสาธารณประโยชน์", brought: 1125000.00, used: 22500.00, color: "#ec4899" },
+                        { name: "ทุนสงเคราะห์เพื่อผู้เสียชีวิต", brought: 1000000.00, used: 10000.00, color: "#84cc16" },
+                        { name: "ทุนสวัสดิการบำเหน็จสมาชิก", brought: 1043800.00, used: 5219.00, color: "#ef4444" }
+                    ]
+                }
+            },
+            profitAllocation: [
+                { item: "กำไรสุทธิประจำปี", y68: 74163297.51, y67: 71111861.95, isBold: true },
+                { item: "1. จัดสรรตาม พ.ร.บ. สหกรณ์ พ.ศ. 2542 มาตรา 60", y68: null, y67: null, isHeader: true },
+                { item: "   1.1 เงินสำรอง ไม่น้อยกว่า 10%", y68: 11510149.51, y67: 12101790.95 },
+                { item: "   1.2 ค่าบำรุงสันนิบาต (ไม่เกิน 30,000 บาท)", y68: 30000.00, y67: 30000.00 },
+                { item: "2. ตามข้อบังคับของสหกรณ์", y68: null, y67: null, isHeader: true },
+                { item: "   2.1 เงินปันผลตามหุ้น", y68: 43233883.00, y67: 42610839.00 },
+                { item: "   2.2 เงินเฉลี่ยคืนให้สมาชิก", y68: 13809265.00, y67: 12309232.00 },
+                { item: "3. ทุนสาธารณประโยชน์", y68: 10000.00, y67: 10000.00 },
+                { item: "4. ทุนศึกษาอบรมทางสหกรณ์", y68: 1230000.00, y67: 500000.00 },
+                { item: "5. ทุนรักษาระดับเงินปันผล", y68: 20000.00, y67: 400000.00 },
+                { item: "6. กองทุนสวัสดิการสมาชิก", y68: 2370000.00, y67: 1500000.00 },
+                { item: "7. กองทุนเพื่อพัฒนาสำนักงาน", y68: 300000.00, y67: 0.00 }
+            ]
+        };
+
+        // Populate default months data based on month 6 template
+        const monthNames = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+        for(let m = 1; m <= 12; m++) {
+            if(!dbData.monthly[m]) {
+                dbData.monthly[m] = JSON.parse(JSON.stringify(dbData.monthly[6]));
+                dbData.monthly[m].monthName = monthNames[m];
+                dbData.monthly[m].revenue = 30000000 * m;
+                dbData.monthly[m].expenses = 12000000 * m;
+                dbData.monthly[m].netProfit = dbData.monthly[m].revenue - dbData.monthly[m].expenses;
+            }
+        }
+
+        let financialChartInstance = null;
+        let profitChartInstance = null;
+        let fundDoughnutChartInstance = null;
+
+        // Formatter Helper
+        function fmt(num, decimals = 2) {
+            if (num === null || num === undefined || isNaN(num)) return '-';
+            return new Intl.NumberFormat('th-TH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(num);
+        }
+
+        // Initialize Dashboard
+        window.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updateDashboard();
+            renderProfitAllocationTable();
+            
+            // Try fetching live data from user's Google Sheet automatically on start
+            fetchLiveGoogleSheetData();
+
+            // Set auto-refresh interval every 30 seconds
+            setInterval(() => {
+                fetchLiveGoogleSheetData(true);
+            }, 30000);
+        });
+
+        let isLightMode = false;
+        
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            const body = document.body;
+            const btnIcon = document.querySelector('#themeToggleBtn i');
+            
+            if (isLightMode) {
+                body.classList.add('light-mode');
+                btnIcon.classList.remove('fa-sun');
+                btnIcon.classList.add('fa-moon');
+                btnIcon.classList.remove('text-amber-400');
+                btnIcon.classList.add('text-slate-600');
+            } else {
+                body.classList.remove('light-mode');
+                btnIcon.classList.remove('fa-moon');
+                btnIcon.classList.add('fa-sun');
+                btnIcon.classList.remove('text-slate-600');
+                btnIcon.classList.add('text-amber-400');
+            }
+            
+            updateChartTheme();
+        }
+
+        function updateChartTheme() {
+            const textColor = isLightMode ? '#475569' : '#94a3b8';
+            const gridColor = isLightMode ? '#e2e8f0' : '#334155';
+            const labelColor = isLightMode ? '#0f172a' : '#f8fafc';
+
+            if (financialChartInstance) {
+                financialChartInstance.options.scales.x.ticks.color = labelColor;
+                financialChartInstance.options.scales.y.ticks.color = textColor;
+                financialChartInstance.options.scales.y.grid.color = gridColor;
+                financialChartInstance.update();
+            }
+
+            if (profitChartInstance) {
+                profitChartInstance.options.scales.x.ticks.color = labelColor;
+                profitChartInstance.options.scales.y.ticks.color = textColor;
+                profitChartInstance.options.scales.y.grid.color = gridColor;
+                profitChartInstance.update();
+            }
+        }
+
+        function extractSheetId(inputStr) {
+            if (!inputStr) return currentSheetId;
+            const match = inputStr.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            return match ? match[1] : inputStr.trim();
+        }
+
+        function updateSheetIdFromInput() {
+            const inputVal = document.getElementById('sheetUrlInput').value;
+            currentSheetId = extractSheetId(inputVal);
+            document.getElementById('sheetLinkBtn').href = `https://docs.google.com/spreadsheets/d/${currentSheetId}/edit?usp=sharing`;
+            fetchLiveGoogleSheetData();
+        }
+
+        async function fetchLiveGoogleSheetData(isBackground = false) {
+            const syncIcon = document.getElementById('syncIcon');
+            const statusEl = document.getElementById('realtimeStatus');
+            
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+            if (!isBackground && statusEl) {
+                statusEl.innerText = `สถานะ: กำลังดึงข้อมูลเรียลไทม์จาก Google Sheet...`;
+            }
+
+            const sheetsToFetch = [
+                { name: 'Financial_Data', handler: parseFinancialSheet },
+                { name: 'Fund_Data', handler: parseFundSheet },
+                { name: 'Member_Data', handler: parseMemberSheet },
+                { name: 'Profit_Allocation', handler: parseProfitAllocationSheet }
+            ];
+
+            let successCount = 0;
+
+            for (const s of sheetsToFetch) {
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${currentSheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(s.name)}`;
+                try {
+                    const resp = await fetch(csvUrl);
+                    if (resp.ok) {
+                        const csvText = await resp.text();
+                        if (csvText && csvText.trim().length > 0) {
+                            Papa.parse(csvText, {
+                                header: true,
+                                dynamicTyping: true,
+                                skipEmptyLines: true,
+                                complete: (results) => {
+                                    if (results.data && results.data.length > 0) {
+                                        s.handler(results.data);
+                                        successCount++;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (err) {
+                    console.log(`Note: Online sheet '${s.name}' fallback to standard cache:`, err);
+                }
+            }
+
+            setTimeout(() => {
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+                if (statusEl) {
+                    if (successCount > 0) {
+                        statusEl.innerText = `สถานะ: เชื่อมต่อสำเร็จ ซิงค์ข้อมูลเรียลไทม์จาก Google Sheet แล้ว (${new Date().toLocaleTimeString('th-TH')})`;
+                    } else {
+                        statusEl.innerText = `สถานะ: ใช้งานข้อมูลระบบการเงินล่าสุด (Google Sheet ID: ${currentSheetId})`;
+                    }
+                }
+                updateDashboard();
+                renderProfitAllocationTable();
+            }, 800);
+        }
+
+        function parseFinancialSheet(rows) {
+            if (!rows || rows.length === 0) return;
+            const keys = Object.keys(rows[0]);
+            
+            rows.forEach(r => {
+                const findVal = (...candidates) => {
+                    for (let cand of candidates) {
+                        for (let k of keys) {
+                            if (k.trim().toLowerCase() === cand.toLowerCase() || k.trim().includes(cand)) {
+                                if (r[k] !== undefined && r[k] !== null && r[k] !== '') {
+                                    return r[k];
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                };
+
+                const mRaw = findVal('Month_No', 'เดือน', 'Month');
+                const m = mRaw ? parseInt(mRaw) : null;
+
+                if (m && dbData.monthly[m]) {
+                    const assets = findVal('Total_Assets', 'สินทรัพย์รวม', 'สินทรัพย์');
+                    const liabilities = findVal('Total_Liabilities', 'หนี้สินรวม', 'หนี้สิน');
+                    const equity = findVal('Total_Equity', 'ทุนรวม', 'ทุน');
+                    const revenue = findVal('Total_Revenue', 'รายได้รวม', 'รายได้');
+                    const expenses = findVal('Total_Expenses', 'ค่าใช้จ่ายรวม', 'ค่าใช้จ่าย');
+
+                    if (assets !== null) dbData.monthly[m].assets = parseFloat(String(assets).replace(/,/g, '')) || dbData.monthly[m].assets;
+                    if (liabilities !== null) dbData.monthly[m].liabilities = parseFloat(String(liabilities).replace(/,/g, '')) || dbData.monthly[m].liabilities;
+                    if (equity !== null) dbData.monthly[m].equity = parseFloat(String(equity).replace(/,/g, '')) || dbData.monthly[m].equity;
+                    if (revenue !== null) dbData.monthly[m].revenue = parseFloat(String(revenue).replace(/,/g, '')) || dbData.monthly[m].revenue;
+                    if (expenses !== null) dbData.monthly[m].expenses = parseFloat(String(expenses).replace(/,/g, '')) || dbData.monthly[m].expenses;
+                    
+                    dbData.monthly[m].netProfit = dbData.monthly[m].revenue - dbData.monthly[m].expenses;
+                }
+            });
+        }
+
+        function parseFundSheet(rows) {
+            if (!rows || rows.length === 0) return;
+            const keys = Object.keys(rows[0]);
+
+            rows.forEach(r => {
+                const findVal = (...candidates) => {
+                    for (let cand of candidates) {
+                        for (let k of keys) {
+                            if (k.trim().toLowerCase() === cand.toLowerCase() || k.trim().includes(cand)) {
+                                if (r[k] !== undefined && r[k] !== null && r[k] !== '') {
+                                    return r[k];
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                };
+
+                const mRaw = findVal('Month_No', 'เดือน', 'Month');
+                const m = mRaw ? parseInt(mRaw) : null;
+                const fname = findVal('Fund_Name', 'ชื่อกองทุน', 'กองทุน', 'Fund');
+
+                if (m && fname && dbData.monthly[m]) {
+                    const cleanFname = String(fname).trim();
+                    const fundObj = dbData.monthly[m].funds.find(f => f.name.trim() === cleanFname || cleanFname.includes(f.name.trim()) || f.name.trim().includes(cleanFname));
+                    
+                    if (fundObj) {
+                        const brought = findVal('Brought_Forward', 'ทุนสะสมยกมา', 'ทุนยกมา', 'Brought');
+                        const used = findVal('Used_Amount', 'ทุนสะสมใช้ไป', 'ทุนใช้ไป', 'Used');
+
+                        if (brought !== null) fundObj.brought = parseFloat(String(brought).replace(/,/g, '')) || fundObj.brought;
+                        if (used !== null) fundObj.used = parseFloat(String(used).replace(/,/g, '')) || fundObj.used;
+                    }
+                }
+            });
+        }
+
+        function parseMemberSheet(rows) {
+            if (!rows || rows.length === 0) return;
+            const keys = Object.keys(rows[0]);
+
+            rows.forEach(r => {
+                const findVal = (...candidates) => {
+                    for (let cand of candidates) {
+                        for (let k of keys) {
+                            if (k.trim().toLowerCase() === cand.toLowerCase() || k.trim().includes(cand)) {
+                                if (r[k] !== undefined && r[k] !== null && r[k] !== '') {
+                                    return r[k];
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                };
+
+                const mRaw = findVal('Month_No', 'เดือน', 'Month');
+                const m = mRaw ? parseInt(mRaw) : null;
+
+                if (m && dbData.monthly[m]) {
+                    const regM = findVal('Regular_Male', 'สมาชิกสามัญชาย', 'สามัญชาย');
+                    const regF = findVal('Regular_Female', 'สมาชิกสามัญหญิง', 'สามัญหญิง');
+                    const assocM = findVal('Associate_Male', 'สมาชิกสมทบชาย', 'สมทบชาย');
+                    const assocF = findVal('Associate_Female', 'สมาชิกสมทบหญิง', 'สมทบหญิง');
+
+                    if (regM !== null) dbData.monthly[m].members.regMale = parseInt(String(regM).replace(/,/g, '')) || 0;
+                    if (regF !== null) dbData.monthly[m].members.regFemale = parseInt(String(regF).replace(/,/g, '')) || 0;
+                    if (assocM !== null) dbData.monthly[m].members.assocMale = parseInt(String(assocM).replace(/,/g, '')) || 0;
+                    if (assocF !== null) dbData.monthly[m].members.assocFemale = parseInt(String(assocF).replace(/,/g, '')) || 0;
+                }
+            });
+        }
+
+        function parseProfitAllocationSheet(rows) {
+            if (!rows || rows.length === 0) return;
+            
+            const firstRowKeys = Object.keys(rows[0] || {});
+            if (firstRowKeys.length === 0) return;
+
+            const getItemVal = (row) => {
+                for (let key of firstRowKeys) {
+                    const cleanKey = key.trim().toLowerCase();
+                    if (cleanKey.includes('รายการ') || cleanKey.includes('item')) {
+                        return row[key];
+                    }
+                }
+                return row[firstRowKeys[0]];
+            };
+
+            const getY68Val = (row) => {
+                for (let key of firstRowKeys) {
+                    const cleanKey = key.trim();
+                    if (cleanKey.includes('2568') || cleanKey.toLowerCase().includes('y68')) {
+                        return row[key];
+                    }
+                }
+                return firstRowKeys[1] ? row[firstRowKeys[1]] : null;
+            };
+
+            const getY67Val = (row) => {
+                for (let key of firstRowKeys) {
+                    const cleanKey = key.trim();
+                    if (cleanKey.includes('2567') || cleanKey.toLowerCase().includes('y67')) {
+                        return row[key];
+                    }
+                }
+                return firstRowKeys[3] ? row[firstRowKeys[3]] : (firstRowKeys[2] ? row[firstRowKeys[2]] : null);
+            };
+
+            const parsed = rows.map(r => {
+                const itemText = getItemVal(r);
+                const y68Raw = getY68Val(r);
+                const y67Raw = getY67Val(r);
+
+                const y68 = (y68Raw !== null && y68Raw !== undefined && y68Raw !== '') ? parseFloat(String(y68Raw).replace(/,/g, '')) : null;
+                const y67 = (y67Raw !== null && y67Raw !== undefined && y67Raw !== '') ? parseFloat(String(y67Raw).replace(/,/g, '')) : null;
+
+                const strItem = itemText ? String(itemText).trim() : '';
+                const isHeader = (isNaN(y68) || y68 === null) && (isNaN(y67) || y67 === null);
+                const isBold = strItem.includes('กำไรสุทธิประจำปี') || strItem.includes('กำไรสุทธิ');
+
+                return {
+                    item: strItem || 'ไม่ระบุรายการ',
+                    y68: isNaN(y68) ? null : y68,
+                    y67: isNaN(y67) ? null : y67,
+                    isHeader: isHeader,
+                    isBold: isBold
+                };
+            }).filter(r => r.item && r.item !== 'undefined');
+
+            if (parsed.length > 0) {
+                dbData.profitAllocation = parsed;
+            }
+        }
+
+        function initCharts() {
+            // Chart 1: Financial Position
+            const ctxFin = document.getElementById('financialChart').getContext('2d');
+            financialChartInstance = new Chart(ctxFin, {
+                type: 'bar',
+                data: {
+                    labels: ['สินทรัพย์รวม', 'หนี้สินรวม', 'ทุนรวม'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
+                        borderRadius: 8,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: value => (value / 1e9).toFixed(1) + 'B'
+                            },
+                            grid: { color: '#334155' }
+                        },
+                        x: { ticks: { color: '#f8fafc', font: { family: 'Prompt' } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 2: Revenue vs Expenses vs Net Profit
+            const ctxProfit = document.getElementById('profitChart').getContext('2d');
+            profitChartInstance = new Chart(ctxProfit, {
+                type: 'bar',
+                data: {
+                    labels: ['รายได้รวม', 'ค่าใช้จ่ายรวม', 'กำไรสุทธิ'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#0284c7', '#a855f7'],
+                        borderRadius: 8,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: value => (value / 1e6).toFixed(0) + 'M'
+                            },
+                            grid: { color: '#334155' }
+                        },
+                        x: { ticks: { color: '#f8fafc', font: { family: 'Prompt' } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 3: Fund Usage Doughnut Chart
+            const ctxFund = document.getElementById('fundDoughnutChart').getContext('2d');
+            fundDoughnutChartInstance = new Chart(ctxFund, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: []
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    return ` ${context.label}: ${fmt(val)} บาท`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function updateDashboard() {
+            const mVal = document.getElementById('monthSelect').value;
+            const yVal = document.getElementById('yearSelect').value;
+            const periodEl = document.getElementById('displayPeriod');
+
+            let curData;
+
+            if (mVal === 'YEAREND') {
+                periodEl.innerText = `สรุปภาพรวมผลการดำเนินงาน ณ สิ้นปี พ.ศ. ${yVal}`;
+                
+                // Aggregate Year-End Data
+                let aggRevenue = 0, aggExpenses = 0;
+                for (let i = 1; i <= 12; i++) {
+                    aggRevenue += dbData.monthly[i].revenue;
+                    aggExpenses += dbData.monthly[i].expenses;
+                }
+
+                // Take Dec for Balance Sheet items
+                const dec = dbData.monthly[12];
+                curData = {
+                    assets: dec.assets,
+                    liabilities: dec.liabilities,
+                    equity: dec.equity,
+                    revenue: aggRevenue,
+                    expenses: aggExpenses,
+                    netProfit: aggRevenue - aggExpenses,
+                    members: dec.members,
+                    funds: dec.funds
+                };
+            } else {
+                const monthIdx = parseInt(mVal);
+                const monthObj = dbData.monthly[monthIdx];
+                periodEl.innerText = `ประจำเดือน ${monthObj.monthName} ${yVal}`;
+                curData = monthObj;
+            }
+
+            // Update Section 1: Financial Cards & Charts
+            document.getElementById('valAssets').innerText = fmt(curData.assets);
+            document.getElementById('valLiabilities').innerText = fmt(curData.liabilities);
+            document.getElementById('valEquity').innerText = fmt(curData.equity);
+            
+            document.getElementById('valRevenue').innerText = fmt(curData.revenue);
+            document.getElementById('valExpenses').innerText = fmt(curData.expenses);
+            document.getElementById('valNetProfit').innerText = fmt(curData.netProfit);
+
+            financialChartInstance.data.datasets[0].data = [curData.assets, curData.liabilities, curData.equity];
+            financialChartInstance.update();
+
+            profitChartInstance.data.datasets[0].data = [curData.revenue, curData.expenses, curData.netProfit];
+            profitChartInstance.update();
+
+            // Update Section 2: Members Table
+            const mem = curData.members;
+            const regTotal = mem.regMale + mem.regFemale;
+            const assocTotal = mem.assocMale + mem.assocFemale;
+            const totalMale = mem.regMale + mem.assocMale;
+            const totalFemale = mem.regFemale + mem.assocFemale;
+            const grandTotal = totalMale + totalFemale;
+
+            document.getElementById('memRegMale').innerText = fmt(mem.regMale, 0);
+            document.getElementById('memRegFemale').innerText = fmt(mem.regFemale, 0);
+            document.getElementById('memRegTotal').innerText = fmt(regTotal, 0);
+
+            document.getElementById('memAssocMale').innerText = fmt(mem.assocMale, 0);
+            document.getElementById('memAssocFemale').innerText = fmt(mem.assocFemale, 0);
+            document.getElementById('memAssocTotal').innerText = fmt(assocTotal, 0);
+
+            document.getElementById('memTotalMale').innerText = fmt(totalMale, 0);
+            document.getElementById('memTotalFemale').innerText = fmt(totalFemale, 0);
+            document.getElementById('memGrandTotal').innerText = fmt(grandTotal, 0);
+            document.getElementById('valTotalMember').innerText = fmt(grandTotal, 0);
+
+            const femalePct = grandTotal > 0 ? ((totalFemale / grandTotal) * 100).toFixed(1) : 0;
+            const malePct = grandTotal > 0 ? ((totalMale / grandTotal) * 100).toFixed(1) : 0;
+            document.getElementById('genderRatio').innerText = `${femalePct}% : ${malePct}%`;
+
+            // Update Section 3: Funds Breakdown & Percentage Report
+            let totalBrought = 0;
+            let totalUsed = 0;
+            const fundLabels = [];
+            const fundUsedData = [];
+            const fundColors = [];
+
+            const listContainer = document.getElementById('fundListContainer');
+            listContainer.innerHTML = '';
+
+            curData.funds.forEach(f => {
+                totalBrought += f.brought;
+                totalUsed += f.used;
+                
+                const remaining = f.brought - f.used;
+                const pct = f.brought > 0 ? ((f.used / f.brought) * 100).toFixed(1) : '0.0';
+
+                fundLabels.push(f.name);
+                fundUsedData.push(f.used);
+                fundColors.push(f.color);
+
+                // Build Fund Row Item
+                const rowHtml = `
+                    <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 flex items-center justify-between hover:border-slate-600 transition">
+                        <div class="flex items-center space-x-2 truncate pr-2">
+                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${f.color}"></span>
+                            <span class="text-slate-200 truncate font-medium">${f.name}</span>
+                        </div>
+                        <div class="text-right flex-shrink-0 font-mono">
+                            <span class="text-white font-bold">${fmt(f.used)}</span>
+                            <span class="text-amber-400 font-semibold ml-1.5">(${pct}%)</span>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', rowHtml);
+            });
+
+            document.getElementById('totalBroughtForward').innerText = fmt(totalBrought);
+            document.getElementById('totalFundUsed').innerText = fmt(totalUsed);
+            const overallPct = totalBrought > 0 ? ((totalUsed / totalBrought) * 100).toFixed(2) : '0.00';
+            document.getElementById('totalFundPercent').innerText = `${overallPct}%`;
+
+            fundDoughnutChartInstance.data.labels = fundLabels;
+            fundDoughnutChartInstance.data.datasets[0].data = fundUsedData;
+            fundDoughnutChartInstance.data.datasets[0].backgroundColor = fundColors;
+            fundDoughnutChartInstance.update();
+        }
+
+        function renderProfitAllocationTable() {
+            const tbody = document.getElementById('profitAllocTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!dbData.profitAllocation || dbData.profitAllocation.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">ไม่มีข้อมูลการจัดสรรกำไรสุทธิ</td></tr>`;
+                return;
+            }
+
+            const totalRow = dbData.profitAllocation.find(r => r.isBold && r.y68) || dbData.profitAllocation[0] || { y68: 1, y67: 1 };
+            const base68 = totalRow.y68 || 1;
+            const base67 = totalRow.y67 || 1;
+
+            dbData.profitAllocation.forEach(row => {
+                const displayItem = row.item && row.item !== 'undefined' ? row.item : 'ไม่ระบุรายการ';
+
+                if (row.isHeader && !row.isBold) {
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="bg-indigo-950/80 font-semibold text-amber-400">
+                            <td colspan="5" class="p-2.5 pl-4">${displayItem}</td>
+                        </tr>
+                    `);
+                } else {
+                    const rowClass = row.isBold ? 'font-bold bg-purple-950/40 text-white border-y border-purple-500/50' : 'hover:bg-slate-700/30 text-slate-200';
+                    
+                    const pct68 = (row.y68 !== null && row.y68 !== undefined && !isNaN(row.y68)) 
+                        ? ((row.y68 / base68) * 100).toFixed(2) 
+                        : (row.isBold ? '100.00' : '-');
+                        
+                    const pct67 = (row.y67 !== null && row.y67 !== undefined && !isNaN(row.y67)) 
+                        ? ((row.y67 / base67) * 100).toFixed(2) 
+                        : (row.isBold ? '100.00' : '-');
+
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="${rowClass}">
+                            <td class="p-2.5 pl-4">${displayItem}</td>
+                            <td class="p-2.5 text-right font-mono">${fmt(row.y68)}</td>
+                            <td class="p-2.5 text-center font-mono text-purple-300 bg-purple-950/20">${pct68 !== '-' ? pct68 + '%' : '-'}</td>
+                            <td class="p-2.5 text-right font-mono">${fmt(row.y67)}</td>
+                            <td class="p-2.5 text-center font-mono text-purple-300 bg-purple-950/20">${pct67 !== '-' ? pct67 + '%' : '-'}</td>
+                        </tr>
+                    `);
+                }
+            });
+        }
+
+        function openSheetModal() {
+            const mVal = document.getElementById('monthSelect').value;
+            const monthIdx = mVal === 'YEAREND' ? 6 : parseInt(mVal);
+            const monthObj = dbData.monthly[monthIdx];
+
+            document.getElementById('inputAssets').value = monthObj.assets;
+            document.getElementById('inputLiabilities').value = monthObj.liabilities;
+            document.getElementById('inputEquity').value = monthObj.equity;
+            document.getElementById('inputRevenue').value = monthObj.revenue;
+            document.getElementById('inputExpenses').value = monthObj.expenses;
+
+            const fundTbody = document.getElementById('inputFundTableBody');
+            fundTbody.innerHTML = '';
+
+            monthObj.funds.forEach((f, idx) => {
+                fundTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="p-2 text-slate-200 font-medium">${f.name}</td>
+                        <td class="p-2">
+                            <input type="number" id="fundBrought_${idx}" value="${f.brought}" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-white text-right font-mono">
+                        </td>
+                        <td class="p-2">
+                            <input type="number" id="fundUsed_${idx}" value="${f.used}" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-white text-right font-mono">
+                        </td>
+                    </tr>
+                `);
+            });
+
+            document.getElementById('sheetModal').classList.remove('hidden');
+        }
+
+        function closeSheetModal() {
+            document.getElementById('sheetModal').classList.add('hidden');
+        }
+
+        function saveLiveSheetData() {
+            const mVal = document.getElementById('monthSelect').value;
+            const monthIdx = mVal === 'YEAREND' ? 6 : parseInt(mVal);
+            const monthObj = dbData.monthly[monthIdx];
+
+            monthObj.assets = parseFloat(document.getElementById('inputAssets').value) || 0;
+            monthObj.liabilities = parseFloat(document.getElementById('inputLiabilities').value) || 0;
+            monthObj.equity = parseFloat(document.getElementById('inputEquity').value) || 0;
+            monthObj.revenue = parseFloat(document.getElementById('inputRevenue').value) || 0;
+            monthObj.expenses = parseFloat(document.getElementById('inputExpenses').value) || 0;
+            monthObj.netProfit = monthObj.revenue - monthObj.expenses;
+
+            monthObj.funds.forEach((f, idx) => {
+                const bEl = document.getElementById(`fundBrought_${idx}`);
+                const uEl = document.getElementById(`fundUsed_${idx}`);
+                if (bEl && uEl) {
+                    f.brought = parseFloat(bEl.value) || 0;
+                    f.used = parseFloat(uEl.value) || 0;
+                }
+            });
+
+            closeSheetModal();
+            updateDashboard();
+
+            // Show Feedback Banner
+            const statusEl = document.getElementById('realtimeStatus');
+            if (statusEl) {
+                statusEl.innerText = `สถานะ: บันทึกและอัปเดตข้อมูล Real-time สำเร็จ (${new Date().toLocaleTimeString('th-TH')})`;
+            }
+        }
+    </script>
+</body>
+</html>
