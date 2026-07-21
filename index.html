@@ -284,10 +284,16 @@
                     <span>ดึงข้อมูล Real-time</span>
                 </button>
 
-                <!-- Open Sheet Modal Button -->
-                <button onclick="openSheetModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-1.5 shadow">
+                <!-- Open Sheet Modal Button (Admin Only) -->
+                <button id="btnOpenModal" onclick="openSheetModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-1.5 shadow">
                     <i class="fa-solid fa-gear text-amber-400"></i>
                     <span>แก้ไขข้อมูล</span>
+                </button>
+
+                <!-- Share Member Link Button (Admin Only) -->
+                <button id="btnShareMember" onclick="copyMemberLink()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-1.5 shadow" title="คัดลอกลิงก์ส่งให้สมาชิกดูได้อย่างเดียว">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>คัดลอกลิงก์สมาชิก</span>
                 </button>
 
                 <!-- Export PDF Button -->
@@ -299,6 +305,12 @@
         </div>
     </header>
 
+    <!-- Notification Toast for Copied Link -->
+    <div id="toastNotif" class="fixed bottom-5 right-5 bg-emerald-600 text-white font-prompt text-xs px-4 py-3 rounded-xl shadow-2xl z-50 hidden transition-all flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check text-base"></i>
+        <span id="toastMsg">คัดลอกลิงก์สำหรับสมาชิกเรียบร้อยแล้ว</span>
+    </div>
+
     <!-- Main Dashboard Container -->
     <main class="max-w-7xl mx-auto px-4 pt-4 pdf-container">
         
@@ -309,6 +321,11 @@
             </div>
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span id="memberBadge" class="hidden bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[11px] font-prompt px-2.5 py-0.5 rounded-full font-semibold">
+                            <i class="fa-solid fa-eye mr-1"></i> รายงานสำหรับสมาชิก (Read-Only)
+                        </span>
+                    </div>
                     <h2 class="text-xl md:text-2xl font-bold font-prompt text-white tracking-wide drop-shadow-md">
                         สรุปผลการดำเนินงาน สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด
                     </h2>
@@ -669,8 +686,54 @@
             return new Intl.NumberFormat('th-TH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(num);
         }
 
+        // Check View Mode (Admin vs Member Read-Only)
+        function checkViewMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isMemberMode = urlParams.get('mode') === 'member' || urlParams.get('view') === 'member' || urlParams.get('public') === 'true';
+
+            if (isMemberMode) {
+                // Hide Edit Buttons for Members
+                const btnEdit = document.getElementById('btnOpenModal');
+                const btnSheet = document.getElementById('sheetLinkBtn');
+                const btnShare = document.getElementById('btnShareMember');
+                const memberBadge = document.getElementById('memberBadge');
+
+                if (btnEdit) btnEdit.style.display = 'none';
+                if (btnSheet) btnSheet.style.display = 'none';
+                if (btnShare) btnShare.style.display = 'none';
+                if (memberBadge) memberBadge.classList.remove('hidden');
+            }
+        }
+
+        // Copy Member Link to Clipboard
+        function copyMemberLink() {
+            const memberUrl = window.location.origin + window.location.pathname + '?mode=member';
+            
+            const tempInput = document.createElement('input');
+            tempInput.value = memberUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast('คัดลอกลิงก์สำหรับสมาชิก (Read-Only) เรียบร้อยแล้ว!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotif');
+            const toastMsg = document.getElementById('toastMsg');
+            if (toast && toastMsg) {
+                toastMsg.innerText = msg;
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
         // Initialize Dashboard
         window.addEventListener('DOMContentLoaded', () => {
+            checkViewMode();
             initCharts();
             updateDashboard();
             
