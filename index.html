@@ -512,17 +512,13 @@
                     </div>
                 </div>
 
-                <!-- Total Funds Summary Footer -->
-                <div class="mt-3 pt-2.5 border-t border-slate-700 grid grid-cols-3 gap-2 text-center text-xs">
-                    <div class="bg-slate-900/70 p-1.5 rounded-lg">
-                        <span class="text-slate-400 text-[11px]">ทุนสะสมยกมารวม:</span>
-                        <p class="font-bold text-white font-mono text-xs md:text-sm mt-0.5" id="totalBroughtForward">0.00</p>
-                    </div>
-                    <div class="bg-slate-900/70 p-1.5 rounded-lg">
+                <!-- Total Funds Summary Footer (Exclusively Fund Used & Fund Percent) -->
+                <div class="mt-3 pt-2.5 border-t border-slate-700 grid grid-cols-2 gap-3 text-center text-xs">
+                    <div class="bg-slate-900/70 p-2 rounded-lg">
                         <span class="text-slate-400 text-[11px]">ทุนสะสมใช้ไปรวม:</span>
                         <p class="font-bold text-amber-400 font-mono text-xs md:text-sm mt-0.5" id="totalFundUsed">0.00</p>
                     </div>
-                    <div class="bg-purple-950/70 border border-purple-800 p-1.5 rounded-lg">
+                    <div class="bg-purple-950/70 border border-purple-800 p-2 rounded-lg">
                         <span class="text-purple-300 font-semibold text-[11px]">ร้อยละการใช้ทุนรวม:</span>
                         <p class="font-bold text-emerald-400 font-mono text-xs md:text-sm mt-0.5" id="totalFundPercent">0.00%</p>
                     </div>
@@ -653,52 +649,30 @@
             "#6366f1", "#14b8a6", "#f97316", "#8b5cf6"
         ];
 
-        // Database simulation and live storage
+        // Database storage (populated exclusively from Google Sheets - No Mock Data)
         const dbData = {
             monthly: {}
         };
 
         const monthNames = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-        
-        // Default fund list structure
-        const defaultFundsList = [
-            { name: "กองทุนสงเคราะห์สวัสดิการสมาชิก", brought: 2000000.00, used: 1601301.26, color: "#2563eb" },
-            { name: "- เพื่อการสงเคราะห์เกี่ยวกับศพของสมาชิก", brought: 500000.00, used: 386000.00, color: "#d97706" },
-            { name: "- เพื่อการสงเคราะห์เกี่ยวกับศพของคู่สมรส", brought: 300000.00, used: 200000.00, color: "#059669" },
-            { name: "เพื่อการสงเคราะห์เกี่ยวกับศพของครอบครัวสมาชิก", brought: 150000.00, used: 93000.00, color: "#9333ea" },
-            { name: "เพื่อรับขวัญทายาทใหม่", brought: 50000.00, used: 9000.00, color: "#0284c7" },
-            { name: "เพื่อสวัสดิการสมาชิกที่เป็นโสด 50 ปี และ 55 ปี", brought: 50000.00, used: 15000.00, color: "#ec4899" },
-            { name: "เพื่อสวัสดิการสมาชิกที่สมรสแล้วไม่มีบุตร", brought: 50000.00, used: 3000.00, color: "#84cc16" },
-            { name: "เพื่อสวัสดิการสมาชิกที่มีอายุ 60 ปีขึ้นไป", brought: 300000.00, used: 151000.00, color: "#ef4444" },
-            { name: "เพื่อสวัสดิการสมาชิกครบรอบวันเกิด", brought: 800000.00, used: 553900.00, color: "#6366f1" },
-            { name: "เพื่อจัดสวัสดิการตามโครงการเพื่อสมาชิก", brought: 500000.00, used: 190401.26, color: "#14b8a6" },
-            { name: "กองทุนเพื่อพัฒนาสำนักงาน", brought: 200000.00, used: 100000.00, color: "#f97316" },
-            { name: "ทุนศึกษาอบรมสหกรณ์ ไม่เกินร้อยละ 10 ของกำไรสุทธิ", brought: 200000.00, used: 100000.00, color: "#8b5cf6" },
-            { name: "ทุนสาธารณประโยชน์ ไม่เกินร้อยละ 10 ของกำไรสุทธิ", brought: 200000.00, used: 100000.00, color: "#e11d48" }
-        ];
 
-        // Populate months 1-12
+        // Populate months 1-12 with zeroed initial state
         for(let m = 1; m <= 12; m++) {
             dbData.monthly[m] = {
                 monthName: monthNames[m],
-                assets: 7139892291.14,
-                liabilities: 4641732122.17,
-                equity: 2390010729.84,
-                revenue: 30000000 * m,
-                expenses: 12000000 * m,
-                netProfit: 18000000 * m,
+                assets: 0,
+                liabilities: 0,
+                equity: 0,
+                revenue: 0,
+                expenses: 0,
+                netProfit: 0,
                 members: {
-                    regMale: 646, regFemale: 2665,
-                    assocMale: 488, assocFemale: 365
+                    regMale: 0, regFemale: 0,
+                    assocMale: 0, assocFemale: 0
                 },
-                funds: JSON.parse(JSON.stringify(defaultFundsList))
+                funds: []
             };
         }
-
-        // Specific overrides for Month 6 (June) initial view
-        dbData.monthly[6].revenue = 182499967.10;
-        dbData.monthly[6].expenses = 74350527.97;
-        dbData.monthly[6].netProfit = 108149439.13;
 
         let financialChartInstance = null;
         let profitChartInstance = null;
@@ -706,7 +680,7 @@
 
         // Formatter Helper
         function fmt(num, decimals = 2) {
-            if (num === null || num === undefined || isNaN(num)) return '-';
+            if (num === null || num === undefined || isNaN(num)) return '0.00';
             return new Intl.NumberFormat('th-TH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(num);
         }
 
@@ -857,34 +831,33 @@
                 }
             }
 
-            // 2. Direct CSV export fetching from Google Sheets URL
+            // 2. Direct CSV export fetching with Tab Name Fallbacks
             const sheetsToFetch = [
-                { name: 'Financial_Data', handler: parseFinancialSheet },
-                { name: 'Fund_Data', handler: parseFundSheet },
-                { name: 'Member_Data', handler: parseMemberSheet }
+                { names: ['Financial_Data', 'Financial Data', 'Financial', 'ฐานะการเงิน'], handler: parseFinancialSheet },
+                { names: ['Fund_Data', 'Fund Data', 'Fund', 'กองทุนสะสม'], handler: parseFundSheet },
+                { names: ['Member_Data', 'Member Data', 'Member', 'สมาชิก'], handler: parseMemberSheet }
             ];
 
             for (const s of sheetsToFetch) {
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${currentSheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(s.name)}`;
-                try {
-                    const resp = await fetch(csvUrl);
-                    if (resp.ok) {
-                        const csvText = await resp.text();
-                        if (csvText && csvText.trim().length > 0) {
-                            Papa.parse(csvText, {
-                                header: true,
-                                dynamicTyping: true,
-                                skipEmptyLines: true,
-                                complete: (results) => {
-                                    if (results.data && results.data.length > 0) {
-                                        s.handler(results.data);
-                                    }
+                let success = false;
+                for (const name of s.names) {
+                    if (success) break;
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${currentSheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+                    try {
+                        const resp = await fetch(csvUrl);
+                        if (resp.ok) {
+                            const csvText = await resp.text();
+                            if (csvText && csvText.trim().length > 0 && !csvText.includes("<!DOCTYPE html>")) {
+                                const rowsObjects = parseCSVToObjects(csvText);
+                                if (rowsObjects && rowsObjects.length > 0) {
+                                    s.handler(rowsObjects);
+                                    success = true;
                                 }
-                            });
+                            }
                         }
+                    } catch (err) {
+                        console.log(`Live Sheet fetch note for ${name}:`, err);
                     }
-                } catch (err) {
-                    console.log(`Live Sheet fetch note for ${s.name}:`, err);
                 }
             }
 
@@ -894,64 +867,97 @@
             }, 600);
         }
 
-        // Section 1 & 2 Financial Sheet Parser
-        function parseFinancialSheet(rows) {
-            if (!rows || rows.length === 0) return;
-            const keys = Object.keys(rows[0]);
+        // CSV Parser Helper to automatically detect header row even if sheet contains titles on rows 1-3
+        function parseCSVToObjects(csvText) {
+            const parsed = Papa.parse(csvText, { skipEmptyLines: true });
+            if (!parsed.data || parsed.data.length === 0) return [];
 
-            rows.forEach(r => {
-                const findVal = (...candidates) => {
-                    for (let cand of candidates) {
-                        for (let k of keys) {
-                            const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
-                            const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
-                            if (cleanKey === cleanCand || cleanKey.includes(cleanCand)) {
-                                if (r[k] !== undefined && r[k] !== null && r[k] !== '') {
-                                    return r[k];
-                                }
-                            }
-                        }
-                    }
-                    return null;
-                };
+            let headerRowIdx = -1;
+            for (let i = 0; i < Math.min(15, parsed.data.length); i++) {
+                const row = parsed.data[i];
+                if (!row || row.length < 2) continue;
 
-                const mRaw = findVal('Month_No', 'เดือน', 'Month');
-                const m = mRaw ? parseInt(mRaw) : null;
+                const nonEmptyCells = row.filter(c => String(c).trim() !== "");
+                if (nonEmptyCells.length < 2) continue; // Skip title banners spanning 1 cell
 
-                if (m && m >= 1 && m <= 12 && dbData.monthly[m]) {
-                    const assets = findVal('Total_Assets', 'Assets', 'สินทรัพย์รวม', 'สินทรัพย์');
-                    const liab = findVal('Total_Liabilities', 'Liabilities', 'หนี้สินรวม', 'หนี้สิน');
-                    const eq = findVal('Total_Equity', 'Equity', 'ทุนรวม', 'ทุน');
-                    const rev = findVal('Total_Revenue', 'Revenue', 'รายได้รวม', 'รายได้');
-                    const exp = findVal('Total_Expenses', 'Expenses', 'ค่าใช้จ่ายรวม', 'ค่าใช้จ่าย');
-                    const profit = findVal('Net_Profit', 'NetProfit', 'กำไรสุทธิ', 'กำไร');
+                const rowArrLower = row.map(c => String(c).trim().toLowerCase());
+                
+                const matchesHeader = rowArrLower.some(cell => 
+                    cell === "เดือน" || cell === "month" || cell === "month_no" || 
+                    cell === "ชื่อกองทุน" || cell === "ชื่อกองทุน / สวัสดิการ" || cell === "fund_name" ||
+                    cell === "สินทรัพย์รวม" || cell === "total_assets" || cell === "assets" ||
+                    cell === "สมาชิกสามัญ (ชาย)" || cell === "regular_male"
+                ) || (
+                    rowArrLower.includes("ปี") && rowArrLower.includes("เดือน")
+                );
 
-                    if (assets !== null) dbData.monthly[m].assets = parseFloat(String(assets).replace(/,/g, '')) || dbData.monthly[m].assets;
-                    if (liab !== null) dbData.monthly[m].liabilities = parseFloat(String(liab).replace(/,/g, '')) || dbData.monthly[m].liabilities;
-                    if (eq !== null) dbData.monthly[m].equity = parseFloat(String(eq).replace(/,/g, '')) || dbData.monthly[m].equity;
-                    if (rev !== null) dbData.monthly[m].revenue = parseFloat(String(rev).replace(/,/g, '')) || dbData.monthly[m].revenue;
-                    if (exp !== null) dbData.monthly[m].expenses = parseFloat(String(exp).replace(/,/g, '')) || dbData.monthly[m].expenses;
-                    
-                    if (profit !== null) {
-                        dbData.monthly[m].netProfit = parseFloat(String(profit).replace(/,/g, '')) || (dbData.monthly[m].revenue - dbData.monthly[m].expenses);
-                    } else {
-                        dbData.monthly[m].netProfit = dbData.monthly[m].revenue - dbData.monthly[m].expenses;
-                    }
+                if (matchesHeader) {
+                    headerRowIdx = i;
+                    break;
                 }
-            });
+            }
+
+            if (headerRowIdx === -1) {
+                let maxCols = 0;
+                parsed.data.forEach((r, idx) => {
+                    const count = r.filter(c => String(c).trim() !== "").length;
+                    if (count > maxCols) {
+                        maxCols = count;
+                        headerRowIdx = idx;
+                    }
+                });
+            }
+
+            if (headerRowIdx === -1) headerRowIdx = 0;
+
+            const headers = parsed.data[headerRowIdx].map(h => String(h || "").trim());
+            const resultObjects = [];
+
+            for (let i = headerRowIdx + 1; i < parsed.data.length; i++) {
+                const row = parsed.data[i];
+                if (!row || row.length === 0) continue;
+
+                const obj = {};
+                let hasValue = false;
+                headers.forEach((h, colIdx) => {
+                    if (h) {
+                        const val = row[colIdx] !== undefined ? String(row[colIdx]).trim() : "";
+                        obj[h] = val;
+                        if (val !== "" && val !== null && val !== undefined) hasValue = true;
+                    }
+                });
+                if (hasValue) {
+                    resultObjects.push(obj);
+                }
+            }
+            return resultObjects;
         }
 
         // Section 4 Dynamic Realtime Sheet Parser strictly for 'Fund_Data' matching Thai headers
         function parseFundSheet(rows) {
             if (!rows || rows.length === 0) return;
-            const keys = Object.keys(rows[0]);
 
             const findValInRow = (row, ...candidates) => {
+                const keys = Object.keys(row);
+                // Pass 1: Exact match
                 for (let cand of candidates) {
+                    const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
                     for (let k of keys) {
                         const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
-                        const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
-                        if (cleanKey === cleanCand || cleanKey.includes(cleanCand)) {
+                        if (cleanKey === cleanCand) {
+                            if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
+                                return row[k];
+                            }
+                        }
+                    }
+                }
+                // Pass 2: Substring match (excluding 'ชื่อเดือน' when searching for 'เดือน')
+                for (let cand of candidates) {
+                    const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
+                    for (let k of keys) {
+                        const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
+                        if (cleanCand === 'เดือน' && cleanKey.includes('ชื่อเดือน')) continue;
+                        if (cleanKey.includes(cleanCand)) {
                             if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
                                 return row[k];
                             }
@@ -974,16 +980,27 @@
                     const cleanFname = String(fname).trim();
                     const broughtRaw = findValInRow(r, 'ทุนสะสมยกมา (บาท)', 'ทุนสะสมยกมา', 'ทุนยกมา', 'Brought_Forward', 'Brought');
                     const usedRaw = findValInRow(r, 'ทุนสะสมใช้ไป (บาท)', 'ทุนสะสมใช้ไป', 'ทุนใช้ไป', 'Used_Amount', 'Used');
+                    const pctRaw = findValInRow(r, 'ร้อยละการใช้ทุน (%)', 'ร้อยละการใช้ทุน', 'ร้อยละ', 'Usage_Percent');
                     const colorRaw = findValInRow(r, 'Color', 'สี');
 
                     const brought = broughtRaw !== null ? (parseFloat(String(broughtRaw).replace(/,/g, '')) || 0) : 0;
                     const used = usedRaw !== null ? (parseFloat(String(usedRaw).replace(/,/g, '')) || 0) : 0;
+                    
+                    let pctVal = null;
+                    if (pctRaw !== null && pctRaw !== undefined && pctRaw !== '') {
+                        const parsedPct = parseFloat(String(pctRaw).replace(/,/g, '').replace(/%/g, ''));
+                        if (!isNaN(parsedPct)) {
+                            pctVal = parsedPct <= 1 && parsedPct > 0 ? parsedPct * 100 : parsedPct;
+                        }
+                    }
+
                     const color = colorRaw ? String(colorRaw).trim() : fundColorsPalette[monthFundsMap[m].length % fundColorsPalette.length];
 
                     monthFundsMap[m].push({
                         name: cleanFname,
                         brought: brought,
                         used: used,
+                        pctVal: pctVal,
                         color: color
                     });
                 }
@@ -1239,39 +1256,57 @@
             const listContainer = document.getElementById('fundListContainer');
             listContainer.innerHTML = '';
 
-            curData.funds.forEach(f => {
-                totalBrought += f.brought;
-                totalUsed += f.used;
-            });
+            if (!curData.funds || curData.funds.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center text-slate-400 py-8 font-prompt text-xs">
+                        <i class="fa-solid fa-database text-lg mb-1 block text-slate-500"></i>
+                        ยังไม่มีข้อมูลทุนสะสมจาก Google Sheets ในงวดนี้
+                    </div>`;
+            } else {
+                curData.funds.forEach(f => {
+                    totalBrought += f.brought;
+                    totalUsed += f.used;
+                });
 
-            curData.funds.forEach(f => {
-                const pct = f.brought > 0 
-                    ? ((f.used / f.brought) * 100).toFixed(1) 
-                    : (totalUsed > 0 ? ((f.used / totalUsed) * 100).toFixed(1) : '0.0');
+                curData.funds.forEach(f => {
+                    let pct = '0.0';
+                    if (f.pctVal !== null && f.pctVal !== undefined) {
+                        pct = f.pctVal.toFixed(1);
+                    } else if (f.brought > 0) {
+                        pct = ((f.used / f.brought) * 100).toFixed(1);
+                    } else if (totalUsed > 0) {
+                        pct = ((f.used / totalUsed) * 100).toFixed(1);
+                    }
 
-                fundLabels.push(f.name);
-                fundUsedData.push(f.used);
-                fundColors.push(f.color);
+                    fundLabels.push(f.name);
+                    fundUsedData.push(f.used);
+                    fundColors.push(f.color);
 
-                // Dynamic Fund Row Item
-                const rowHtml = `
-                    <div class="bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/50 flex items-center justify-between hover:border-slate-600 transition">
-                        <div class="flex items-center space-x-2 truncate pr-2">
-                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${f.color}"></span>
-                            <span class="text-slate-200 truncate font-medium text-[11px]">${f.name}</span>
+                    // Dynamic Fund Row Item
+                    const rowHtml = `
+                        <div class="bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/50 flex items-center justify-between hover:border-slate-600 transition">
+                            <div class="flex items-center space-x-2 truncate pr-2">
+                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${f.color}"></span>
+                                <span class="text-slate-200 truncate font-medium text-[11px]">${f.name}</span>
+                            </div>
+                            <div class="text-right flex-shrink-0 font-mono text-[11px]">
+                                <span class="text-white font-bold">${fmt(f.used)}</span>
+                                <span class="text-amber-400 font-semibold ml-1">(${pct}%)</span>
+                            </div>
                         </div>
-                        <div class="text-right flex-shrink-0 font-mono text-[11px]">
-                            <span class="text-white font-bold">${fmt(f.used)}</span>
-                            <span class="text-amber-400 font-semibold ml-1">(${pct}%)</span>
-                        </div>
-                    </div>
-                `;
-                listContainer.insertAdjacentHTML('beforeend', rowHtml);
-            });
+                    `;
+                    listContainer.insertAdjacentHTML('beforeend', rowHtml);
+                });
+            }
 
-            document.getElementById('totalBroughtForward').innerText = fmt(totalBrought);
             document.getElementById('totalFundUsed').innerText = fmt(totalUsed);
-            const overallPct = totalBrought > 0 ? ((totalUsed / totalBrought) * 100).toFixed(2) : '0.00';
+            
+            let overallPct = '0.00';
+            if (totalBrought > 0) {
+                overallPct = ((totalUsed / totalBrought) * 100).toFixed(2);
+            } else if (totalUsed > 0) {
+                overallPct = '100.00';
+            }
             document.getElementById('totalFundPercent').innerText = `${overallPct}%`;
 
             fundDoughnutChartInstance.data.labels = fundLabels;
