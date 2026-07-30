@@ -168,12 +168,10 @@
         }
         body.light-mode .border-slate-700,
         body.light-mode .border-slate-800,
-        body.light-mode .border-slate-700\/50,
         body.light-mode header.border-slate-800 {
             border-color: #cbd5e1 !important;
         }
         
-        /* Dashboard Card Legibility inside Light Mode */
         body.light-mode .dashboard-card h3,
         body.light-mode .dashboard-card h4,
         body.light-mode .dashboard-card p,
@@ -195,52 +193,27 @@
             color: #334155 !important;
         }
         
-        /* Background Overrides for Light Mode Cards & Containers */
-        body.light-mode .bg-slate-900,
+        body.light-mode .bg-slate-800,
         body.light-mode .bg-slate-900\/60,
         body.light-mode .bg-slate-900\/70,
         body.light-mode .bg-slate-900\/80,
-        body.light-mode .bg-slate-950,
-        body.light-mode .bg-slate-800 {
+        body.light-mode .bg-slate-900,
+        body.light-mode .bg-slate-950 {
             background-color: #f1f5f9 !important;
             border-color: #cbd5e1 !important;
         }
 
-        body.light-mode .bg-slate-900\/60 *,
-        body.light-mode .bg-slate-900\/70 *,
-        body.light-mode .bg-slate-900\/80 * {
-            color: #0f172a !important;
-        }
-        
         body.light-mode .bg-indigo-950,
-        body.light-mode .bg-indigo-950\/40,
-        body.light-mode .bg-indigo-950\/60 {
+        body.light-mode .bg-indigo-950\/40 {
             background-color: #e0e7ff !important;
             border-color: #a5b4fc !important;
             color: #1e1b4b !important;
         }
-        
         body.light-mode .bg-indigo-900 {
             background-color: #c7d2fe !important;
             color: #1e1b4b !important;
         }
 
-        body.light-mode .bg-purple-950\/70,
-        body.light-mode .bg-purple-950 {
-            background-color: #f3e8ff !important;
-            border-color: #d8b4fe !important;
-        }
-        body.light-mode .bg-purple-950 .text-purple-300,
-        body.light-mode .bg-purple-950\/70 .text-purple-300 {
-            color: #6b21a8 !important;
-        }
-
-        body.light-mode .bg-sky-950 {
-            background-color: #e0f2fe !important;
-            border-color: #7dd3fc !important;
-        }
-
-        /* Preserve Crisp Bright Text Inside Banner Card */
         body.light-mode .banner-card {
             background: linear-gradient(to right, #2e1065, #1e1b4b, #0f172a) !important;
             border-color: #581c87 !important;
@@ -252,7 +225,6 @@
             color: #fbbf24 !important;
         }
 
-        /* High Contrast Text Color Overrides for Light Mode */
         body.light-mode .text-amber-400, body.light-mode .text-amber-500 { color: #b45309 !important; }
         body.light-mode .text-emerald-400 { color: #059669 !important; }
         body.light-mode .text-blue-400 { color: #1d4ed8 !important; }
@@ -260,19 +232,6 @@
         body.light-mode .text-purple-400, body.light-mode .text-purple-300 { color: #7e22ce !important; }
         body.light-mode .text-indigo-200, body.light-mode .text-indigo-300, body.light-mode .text-indigo-400 { color: #3730a3 !important; }
         
-        /* Footer text contrast in Light Mode */
-        body.light-mode footer,
-        body.light-mode footer * {
-            color: #334155 !important;
-        }
-        body.light-mode footer .text-slate-200 {
-            color: #0f172a !important;
-        }
-        body.light-mode footer .text-amber-400 {
-            color: #b45309 !important;
-        }
-
-        /* Table Light Mode Adjustments */
         body.light-mode table th,
         body.light-mode table td {
             color: #0f172a !important;
@@ -322,12 +281,11 @@
                     </select>
                 </div>
 
-                <!-- Select Fiscal Year -->
+                <!-- Select Fiscal Year (FY 2569 only) -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
                     <label class="text-xs font-medium text-slate-300">ปีงบประมาณ พ.ศ.:</label>
                     <select id="yearSelect" onchange="updateDashboard()" class="bg-transparent text-xs font-prompt text-white focus:outline-none cursor-pointer">
                         <option value="2569" class="bg-slate-800" selected>2569 (ต.ค. 68 - ก.ย. 69)</option>
-                        <option value="2568" class="bg-slate-800">2568 (ต.ค. 67 - ก.ย. 68)</option>
                     </select>
                 </div>
 
@@ -369,7 +327,6 @@
         <span id="toastMsg">คัดลอกลิงก์สำหรับสมาชิกเรียบร้อยแล้ว</span>
     </div>
 
-    <!-- Main Dashboard Container -->
     <main class="max-w-7xl mx-auto px-4 pt-4 pdf-container">
         
         <!-- Dashboard Banner Header Card -->
@@ -475,7 +432,7 @@
         <!-- Dashboard Grid Section 2: Members & Fund Usage (%) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5">
             
-            <!-- Card 3: Member Summary (Separated strictly by Member Type: Regular vs Associate) -->
+            <!-- Card 3: Member Summary -->
             <div class="lg:col-span-5 dashboard-card bg-slate-800/90 border border-slate-700 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3 border-b border-slate-700/80 pb-2.5">
@@ -727,7 +684,7 @@
             "#6366f1", "#14b8a6", "#f97316", "#8b5cf6"
         ];
 
-        // Global Fiscal Month Mapping helper for Thai Month names (Full & Short)
+        // Global Fiscal Month Mapping helper for Thai Month names
         const monthNameToFiscalIdx = {
             "ตุลาคม": 1, "ต.ค.": 1, "ต.ค": 1, "october": 1, "oct": 1,
             "พฤศจิกายน": 2, "พ.ย.": 2, "พ.ย": 2, "november": 2, "nov": 2,
@@ -774,7 +731,7 @@
             };
         }
 
-        // Initialize default values for Month 9 (June 2569) matching Google Sheet so Section 4 renders immediately
+        // Default initial data for Month 9 (June 2569) matching Google Sheet
         dbData.monthly[9].assets = 1946649272.99;
         dbData.monthly[9].liabilities = 864721880.80;
         dbData.monthly[9].equity = 1081927392.19;
@@ -1178,7 +1135,7 @@
             };
 
             const monthFundsMap = {};
-            let lastSeenMonth = 9; // Default fallback to June (Month 9)
+            let lastSeenMonth = 9;
 
             rows.forEach(r => {
                 let targetMonthIdx = null;
@@ -1417,7 +1374,6 @@
             });
         }
 
-        // Percentage calculation rule ensuring 4 main funds sum up to <= 100%
         function calculateFundPercentage(f, netProfit, totalUsed) {
             let pct = 0;
             let label = 'สัดส่วนสวัสดิการเทียบกับยอดใช้ทุนรวม 4 กองทุน (รวมกันไม่เกิน 100%)';
@@ -1442,16 +1398,21 @@
             let curData;
 
             if (mVal === 'YEAREND') {
-                periodEl.innerText = `สรุปภาพรวมผลการดำเนินงาน ณ สิ้นปีงบประมาณ พ.ศ. ${yVal} (ณ 30 กันยายน ${yVal})`;
+                periodEl.innerText = `สรุปภาพรวมผลการดำเนินงาน ณ สิ้นปีงบประมาณ พ.ศ. ${yVal} (ต.ค. 68 - ก.ย. 69)`;
                 
-                let aggRevenue = 0, aggExpenses = 0;
-                fiscalMonthOrder.forEach(mIdx => {
-                    aggRevenue += dbData.monthly[mIdx].revenue;
-                    aggExpenses += dbData.monthly[mIdx].expenses;
-                });
+                // Find latest month with non-zero data in fiscal year 2569 (months 1 to 12)
+                let latestM = 12;
+                for (let m = 12; m >= 1; m--) {
+                    const mData = dbData.monthly[m];
+                    if (mData && (mData.assets > 0 || mData.revenue > 0 || (mData.members && mData.members.grandTot > 0) || (mData.funds && mData.funds.length > 0))) {
+                        latestM = m;
+                        break;
+                    }
+                }
 
-                const sepEnd = dbData.monthly[12];
+                const monthObj = dbData.monthly[latestM];
 
+                // Aggregate fund data up to latest month
                 const fundAggMap = {};
                 fiscalMonthOrder.forEach(mIdx => {
                     const mFunds = dbData.monthly[mIdx].funds || [];
@@ -1460,14 +1421,20 @@
                             fundAggMap[f.name] = {
                                 name: f.name,
                                 brought: f.brought,
-                                used: 0,
+                                used: f.used,
                                 subItems: f.subItems || [],
                                 color: f.color || fundColorsPalette[idx % fundColorsPalette.length]
                             };
-                        }
-                        fundAggMap[f.name].used += f.used;
-                        if (f.brought > fundAggMap[f.name].brought) {
-                            fundAggMap[f.name].brought = f.brought;
+                        } else {
+                            if (f.used > fundAggMap[f.name].used) {
+                                fundAggMap[f.name].used = f.used;
+                            }
+                            if (f.brought > fundAggMap[f.name].brought) {
+                                fundAggMap[f.name].brought = f.brought;
+                            }
+                            if (f.subItems && f.subItems.length > 0) {
+                                fundAggMap[f.name].subItems = f.subItems;
+                            }
                         }
                     });
                 });
@@ -1475,14 +1442,14 @@
                 const yearEndFunds = Object.values(fundAggMap);
 
                 curData = {
-                    assets: sepEnd.assets,
-                    liabilities: sepEnd.liabilities,
-                    equity: sepEnd.equity,
-                    revenue: aggRevenue,
-                    expenses: aggExpenses,
-                    netProfit: aggRevenue - aggExpenses,
-                    members: sepEnd.members,
-                    funds: yearEndFunds.length > 0 ? yearEndFunds : sepEnd.funds
+                    assets: monthObj.assets,
+                    liabilities: monthObj.liabilities,
+                    equity: monthObj.equity,
+                    revenue: monthObj.revenue,
+                    expenses: monthObj.expenses,
+                    netProfit: monthObj.netProfit,
+                    members: monthObj.members,
+                    funds: yearEndFunds.length > 0 ? yearEndFunds : monthObj.funds
                 };
             } else {
                 const monthIdx = parseInt(mVal);
