@@ -142,11 +142,25 @@
             background-color: #f8fafc !important;
             color: #0f172a !important;
         }
-        body.light-mode .bg-slate-900,
-        body.light-mode .bg-slate-950,
-        body.light-mode header.bg-slate-900 {
+        body.light-mode header {
             background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
         }
+        body.light-mode header h1,
+        body.light-mode header p,
+        body.light-mode header label,
+        body.light-mode header select {
+            color: #0f172a !important;
+        }
+        body.light-mode header select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        body.light-mode header .bg-slate-800 {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+        
         body.light-mode .dashboard-card {
             background-color: #ffffff !important;
             border-color: #cbd5e1 !important;
@@ -154,71 +168,121 @@
         }
         body.light-mode .border-slate-700,
         body.light-mode .border-slate-800,
+        body.light-mode .border-slate-700\/50,
         body.light-mode header.border-slate-800 {
             border-color: #cbd5e1 !important;
         }
         
+        /* Dashboard Card Legibility inside Light Mode */
+        body.light-mode .dashboard-card h3,
+        body.light-mode .dashboard-card h4,
+        body.light-mode .dashboard-card p,
+        body.light-mode .dashboard-card span,
+        body.light-mode .dashboard-card label,
+        body.light-mode .dashboard-card td,
+        body.light-mode .dashboard-card th {
+            color: #0f172a !important;
+        }
         body.light-mode .dashboard-card .text-white,
+        body.light-mode .dashboard-card .text-slate-100,
         body.light-mode .dashboard-card .text-slate-200 {
             color: #0f172a !important;
         }
         body.light-mode .dashboard-card .text-slate-300 {
-            color: #334155 !important;
+            color: #1e293b !important;
         }
         body.light-mode .dashboard-card .text-slate-400 {
-            color: #475569 !important;
+            color: #334155 !important;
         }
         
+        /* Background Overrides for Light Mode Cards & Containers */
+        body.light-mode .bg-slate-900,
+        body.light-mode .bg-slate-900\/60,
+        body.light-mode .bg-slate-900\/70,
+        body.light-mode .bg-slate-900\/80,
+        body.light-mode .bg-slate-950,
+        body.light-mode .bg-slate-800 {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        body.light-mode .bg-slate-900\/60 *,
+        body.light-mode .bg-slate-900\/70 *,
+        body.light-mode .bg-slate-900\/80 * {
+            color: #0f172a !important;
+        }
+        
+        body.light-mode .bg-indigo-950,
+        body.light-mode .bg-indigo-950\/40,
+        body.light-mode .bg-indigo-950\/60 {
+            background-color: #e0e7ff !important;
+            border-color: #a5b4fc !important;
+            color: #1e1b4b !important;
+        }
+        
+        body.light-mode .bg-indigo-900 {
+            background-color: #c7d2fe !important;
+            color: #1e1b4b !important;
+        }
+
+        body.light-mode .bg-purple-950\/70,
+        body.light-mode .bg-purple-950 {
+            background-color: #f3e8ff !important;
+            border-color: #d8b4fe !important;
+        }
+        body.light-mode .bg-purple-950 .text-purple-300,
+        body.light-mode .bg-purple-950\/70 .text-purple-300 {
+            color: #6b21a8 !important;
+        }
+
+        body.light-mode .bg-sky-950 {
+            background-color: #e0f2fe !important;
+            border-color: #7dd3fc !important;
+        }
+
+        /* Preserve Crisp Bright Text Inside Banner Card */
         body.light-mode .banner-card {
             background: linear-gradient(to right, #2e1065, #1e1b4b, #0f172a) !important;
             border-color: #581c87 !important;
         }
-        body.light-mode .banner-card .text-white,
-        .banner-card .text-white {
+        body.light-mode .banner-card * {
             color: #ffffff !important;
         }
-        body.light-mode .banner-card .text-slate-200,
-        .banner-card .text-slate-200 {
-            color: #f1f5f9 !important;
-        }
-        body.light-mode .banner-card .text-amber-400,
-        .banner-card .text-amber-400 {
+        body.light-mode .banner-card .text-amber-400 {
             color: #fbbf24 !important;
         }
 
-        body.light-mode select.text-white {
-            color: #0f172a !important;
-        }
-        body.light-mode select option {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-        }
-        body.light-mode .bg-slate-800 {
-            background-color: #f1f5f9 !important;
-        }
-        body.light-mode .bg-slate-900\/60,
-        body.light-mode .bg-slate-900\/70,
-        body.light-mode .bg-slate-900\/80 {
-            background-color: #f1f5f9 !important;
-            border-color: #cbd5e1 !important;
-        }
-        
+        /* High Contrast Text Color Overrides for Light Mode */
         body.light-mode .text-amber-400, body.light-mode .text-amber-500 { color: #b45309 !important; }
-        body.light-mode .text-emerald-400 { color: #047857 !important; }
+        body.light-mode .text-emerald-400 { color: #059669 !important; }
         body.light-mode .text-blue-400 { color: #1d4ed8 !important; }
-        body.light-mode .text-sky-400 { color: #0369a1 !important; }
-        body.light-mode .text-purple-400 { color: #7e22ce !important; }
+        body.light-mode .text-sky-400, body.light-mode .text-sky-300 { color: #0284c7 !important; }
+        body.light-mode .text-purple-400, body.light-mode .text-purple-300 { color: #7e22ce !important; }
+        body.light-mode .text-indigo-200, body.light-mode .text-indigo-300, body.light-mode .text-indigo-400 { color: #3730a3 !important; }
         
-        body.light-mode table th { color: #0f172a !important; }
-        body.light-mode .bg-slate-900, body.light-mode .bg-slate-950 { background-color: #f1f5f9 !important; color: #0f172a !important; }
-        body.light-mode .bg-indigo-950, body.light-mode .bg-indigo-950\/40 { background-color: #e0e7ff !important; color: #1e3a8a !important; }
-        body.light-mode .bg-indigo-900 { background-color: #c7d2fe !important; color: #1e3a8a !important; }
+        /* Footer text contrast in Light Mode */
+        body.light-mode footer,
+        body.light-mode footer * {
+            color: #334155 !important;
+        }
+        body.light-mode footer .text-slate-200 {
+            color: #0f172a !important;
+        }
+        body.light-mode footer .text-amber-400 {
+            color: #b45309 !important;
+        }
+
+        /* Table Light Mode Adjustments */
+        body.light-mode table th,
+        body.light-mode table td {
+            color: #0f172a !important;
+        }
         
         body.light-mode .divide-slate-700\/60 > :not([hidden]) ~ :not([hidden]) {
             border-color: #cbd5e1 !important;
         }
         
-        body.light-mode tr.hover\:bg-slate-700\/30:hover { background-color: #f1f5f9 !important; }
+        body.light-mode tr.hover\:bg-slate-700\/30:hover { background-color: #e2e8f0 !important; }
     </style>
 </head>
 <body class="min-h-screen pb-10">
@@ -305,9 +369,10 @@
         <span id="toastMsg">คัดลอกลิงก์สำหรับสมาชิกเรียบร้อยแล้ว</span>
     </div>
 
+    <!-- Main Dashboard Container -->
     <main class="max-w-7xl mx-auto px-4 pt-4 pdf-container">
         
-        <!-- Banner Header Card -->
+        <!-- Dashboard Banner Header Card -->
         <div class="banner-card bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-2xl p-5 mb-5 shadow-2xl border border-purple-800/40 relative overflow-hidden">
             <div class="absolute -right-10 -bottom-10 opacity-10 text-white">
                 <i class="fa-solid fa-building-columns text-[180px]"></i>
@@ -338,6 +403,7 @@
             </div>
         </div>
 
+        <!-- Dashboard Grid Section 1: Financial Position & Revenue/Expenses -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
             
             <!-- Card 1: Financial Position -->
@@ -406,6 +472,7 @@
 
         </div>
 
+        <!-- Dashboard Grid Section 2: Members & Fund Usage (%) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5">
             
             <!-- Card 3: Member Summary (Separated strictly by Member Type: Regular vs Associate) -->
@@ -448,7 +515,7 @@
                         </div>
                     </div>
 
-                    <!-- Detailed Member Breakdown Table (Without Gender, strictly Member Types) -->
+                    <!-- Detailed Member Breakdown Table -->
                     <div class="overflow-x-auto my-2">
                         <table class="w-full text-xs text-left border-collapse">
                             <thead>
@@ -502,7 +569,6 @@
                         </div>
                         <div>
                             <h3 class="font-prompt font-semibold text-base text-white">4. การใช้ทุนสะสมตามข้อบังคับ (รายงานร้อยละ %)</h3>
-                            <p class="text-[11px] text-slate-400">ดึงข้อมูลจาก Google Sheets (ชีต: <span class="text-amber-400 font-semibold">กองทุน</span> / <span class="text-amber-400 font-semibold">Fund_Data</span>) แบบเรียลไทม์</p>
                         </div>
                     </div>
                     <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-800 px-2 py-0.5 rounded-md font-mono">
@@ -661,6 +727,22 @@
             "#6366f1", "#14b8a6", "#f97316", "#8b5cf6"
         ];
 
+        // Global Fiscal Month Mapping helper for Thai Month names (Full & Short)
+        const monthNameToFiscalIdx = {
+            "ตุลาคม": 1, "ต.ค.": 1, "ต.ค": 1, "october": 1, "oct": 1,
+            "พฤศจิกายน": 2, "พ.ย.": 2, "พ.ย": 2, "november": 2, "nov": 2,
+            "ธันวาคม": 3, "ธ.ค.": 3, "ธ.ค": 3, "december": 3, "dec": 3,
+            "มกราคม": 4, "ม.ค.": 4, "ม.ค": 4, "january": 4, "jan": 4,
+            "กุมภาพันธ์": 5, "ก.พ.": 5, "ก.พ": 5, "february": 5, "feb": 5,
+            "มีนาคม": 6, "มี.ค.": 6, "มี.ค": 6, "march": 6, "mar": 6,
+            "เมษายน": 7, "เม.ย.": 7, "เม.ย": 7, "april": 7, "apr": 7,
+            "พฤษภาคม": 8, "พ.ค.": 8, "พ.ค": 8, "may": 8,
+            "มิถุนายน": 9, "มิ.ย.": 9, "มิ.ย": 9, "june": 9, "jun": 9,
+            "กรกฎาคม": 10, "ก.ค.": 10, "ก.ค": 10, "july": 10, "jul": 10,
+            "สิงหาคม": 11, "ส.ค.": 11, "ส.ค": 11, "august": 11, "aug": 11,
+            "กันยายน": 12, "ก.ย.": 12, "ก.ย": 12, "september": 12, "sep": 12
+        };
+
         // Database storage
         const dbData = {
             monthly: {}
@@ -691,6 +773,60 @@
                 funds: []
             };
         }
+
+        // Initialize default values for Month 9 (June 2569) matching Google Sheet so Section 4 renders immediately
+        dbData.monthly[9].assets = 1946649272.99;
+        dbData.monthly[9].liabilities = 864721880.80;
+        dbData.monthly[9].equity = 1081927392.19;
+        dbData.monthly[9].revenue = 75728913.51;
+        dbData.monthly[9].expenses = 17172659.57;
+        dbData.monthly[9].netProfit = 58556253.94;
+        dbData.monthly[9].members = { regTotal: 1683, assocTotal: 206, grandTot: 1889 };
+        dbData.monthly[9].funds = [
+            {
+                name: "กองทุนสงเคราะห์สวัสดิการสมาชิก",
+                brought: 0,
+                used: 1601301.26,
+                pctVal: null,
+                color: "#2563eb",
+                subItems: [
+                    { name: "เพื่อการสงเคราะห์เกี่ยวกับการศพของสมาชิก", used: 386000.00 },
+                    { name: "เพื่อการสงเคราะห์เกี่ยวกับการศพของคู่สมรส", used: 200000.00 },
+                    { name: "เพื่อการสงเคราะห์เกี่ยวกับการศพของครอบครัวสมาชิก", used: 93000.00 },
+                    { name: "เพื่อทุนส่งเสริมการศึกษาบุตรสมาชิก ปี 2569", used: 0.00 },
+                    { name: "เพื่อรับขวัญทายาทใหม่", used: 9000.00 },
+                    { name: "เพื่อสวัสดิการสมาชิกที่เป็นโสด 50 ปี และ 55 ปี", used: 15000.00 },
+                    { name: "เพื่อสวัสดิการสมาชิกที่สมรสแล้วไม่มีบุตร", used: 3000.00 },
+                    { name: "เพื่อสวัสดิการสมาชิกที่มีอายุ 60 ปีขึ้นไป", used: 151000.00 },
+                    { name: "เพื่อสวัสดิการสมาชิกครบรอบวันเกิด", used: 553900.00 },
+                    { name: "เพื่อจัดสวัสดิการตามโครงการเพื่อสมาชิก (บาท)", used: 190401.26 }
+                ]
+            },
+            {
+                name: "กองทุนเพื่อพัฒนาสำนักงาน",
+                brought: 0,
+                used: 0.00,
+                pctVal: null,
+                color: "#d97706",
+                subItems: []
+            },
+            {
+                name: "ทุนศึกษาอบรมสหกรณ์ ไม่เกินร้อยละ 10 ของกำไรสุทธิ",
+                brought: 0,
+                used: 0.00,
+                pctVal: null,
+                color: "#059669",
+                subItems: []
+            },
+            {
+                name: "ทุนสาธารณประโยชน์ ไม่เกินร้อยละ 10 ของกำไรสุทธิ",
+                brought: 0,
+                used: 0.00,
+                pctVal: null,
+                color: "#9333ea",
+                subItems: []
+            }
+        ];
 
         let financialChartInstance = null;
         let profitChartInstance = null;
@@ -780,8 +916,8 @@
         }
 
         function updateChartTheme() {
-            const textColor = isLightMode ? '#475569' : '#94a3b8';
-            const gridColor = isLightMode ? '#e2e8f0' : '#334155';
+            const textColor = isLightMode ? '#0f172a' : '#94a3b8';
+            const gridColor = isLightMode ? '#cbd5e1' : '#334155';
             const labelColor = isLightMode ? '#0f172a' : '#f8fafc';
 
             if (financialChartInstance) {
@@ -1010,21 +1146,6 @@
             });
         }
 
-        const monthNameToFiscalIdx = {
-            "ตุลาคม": 1, "ต.ค.": 1, "ต.ค": 1, "october": 1, "oct": 1,
-            "พฤศจิกายน": 2, "พ.ย.": 2, "พ.ย": 2, "november": 2, "nov": 2,
-            "ธันวาคม": 3, "ธ.ค.": 3, "ธ.ค": 3, "december": 3, "dec": 3,
-            "มกราคม": 4, "ม.ค.": 4, "ม.ค": 4, "january": 4, "jan": 4,
-            "กุมภาพันธ์": 5, "ก.พ.": 5, "ก.พ": 5, "february": 5, "feb": 5,
-            "มีนาคม": 6, "มี.ค.": 6, "มี.ค": 6, "march": 6, "mar": 6,
-            "เมษายน": 7, "เม.ย.": 7, "เม.ย": 7, "april": 7, "apr": 7,
-            "พฤษภาคม": 8, "พ.ค.": 8, "พ.ค": 8, "may": 8,
-            "มิถุนายน": 9, "มิ.ย.": 9, "มิ.ย": 9, "june": 9, "jun": 9,
-            "กรกฎาคม": 10, "ก.ค.": 10, "ก.ค": 10, "july": 10, "jul": 10,
-            "สิงหาคม": 11, "ส.ค.": 11, "ส.ค": 11, "august": 11, "aug": 11,
-            "กันยายน": 12, "ก.ย.": 12, "ก.ย": 12, "september": 12, "sep": 12
-        };
-
         function parseFundSheet(rows) {
             if (!rows || rows.length === 0) return;
 
@@ -1057,6 +1178,7 @@
             };
 
             const monthFundsMap = {};
+            let lastSeenMonth = 9; // Default fallback to June (Month 9)
 
             rows.forEach(r => {
                 let targetMonthIdx = null;
@@ -1078,6 +1200,12 @@
                         const parsedNum = parseInt(mRaw);
                         if (parsedNum >= 1 && parsedNum <= 12) targetMonthIdx = parsedNum;
                     }
+                }
+
+                if (targetMonthIdx) {
+                    lastSeenMonth = targetMonthIdx;
+                } else {
+                    targetMonthIdx = lastSeenMonth;
                 }
 
                 const fname = findValInRow(r, 'ชื่อกองทุน / สวัสดิการ', 'ชื่อกองทุน', 'Fund_Name', 'กองทุน', 'สวัสดิการ', 'Fund');
@@ -1289,6 +1417,7 @@
             });
         }
 
+        // Percentage calculation rule ensuring 4 main funds sum up to <= 100%
         function calculateFundPercentage(f, netProfit, totalUsed) {
             let pct = 0;
             let label = 'สัดส่วนสวัสดิการเทียบกับยอดใช้ทุนรวม 4 กองทุน (รวมกันไม่เกิน 100%)';
