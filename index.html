@@ -53,7 +53,7 @@
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 5mm 6mm;
+                margin: 4mm 5mm;
             }
             html, body {
                 background-color: #ffffff !important;
@@ -61,7 +61,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
-                font-size: 10px !important;
+                font-size: 9.5px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -74,13 +74,16 @@
                 padding: 0 !important;
                 margin: 0 !important;
             }
+            .grid {
+                gap: 8px !important;
+            }
             
             /* Banner Print Styling */
             .banner-card {
                 background: linear-gradient(to right, #1e1b4b, #312e81, #0f172a) !important;
                 color: #ffffff !important;
                 border: 1px solid #4338ca !important;
-                padding: 8px 12px !important;
+                padding: 6px 10px !important;
                 margin-bottom: 6px !important;
                 border-radius: 8px !important;
                 page-break-inside: avoid !important;
@@ -101,7 +104,7 @@
                 box-shadow: none !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                padding: 6px 10px !important;
+                padding: 6px 8px !important;
                 border-radius: 8px !important;
             }
             .dashboard-card h3, .dashboard-card p, .dashboard-card span, .dashboard-card td, .dashboard-card th {
@@ -110,17 +113,21 @@
             
             /* Ensure charts fit inside A4 landscape cards */
             canvas {
-                max-height: 150px !important;
+                max-height: 125px !important;
                 width: 100% !important;
+            }
+            .max-h-52, .max-h-56 {
+                max-height: none !important;
+                overflow: visible !important;
             }
 
             /* Compact Table Print View */
             table th, table td {
                 padding: 2px 4px !important;
-                font-size: 10px !important;
+                font-size: 9px !important;
             }
             .bg-slate-900, .bg-indigo-950, .bg-slate-800 {
-                background-color: #f1f5f9 !important;
+                background-color: #f8fafc !important;
                 color: #0f172a !important;
             }
             .text-white, .text-slate-200, .text-slate-300, .text-slate-400 {
@@ -260,7 +267,7 @@
 
             <!-- Controls -->
             <div class="flex flex-wrap items-center gap-2.5">
-                <!-- Select Month (Fiscal Year Alignment: 1=Oct, 2=Nov, ..., 9=Jun, 12=Sep) -->
+                <!-- Select Month -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
                     <i class="fa-regular fa-calendar-check text-amber-400"></i>
                     <label class="text-xs font-medium text-slate-300">งวดรายงาน (ปีงบประมาณ):</label>
@@ -277,11 +284,10 @@
                         <option value="10" class="bg-slate-800 text-white">ประจำเดือน กรกฎาคม (ก.ค.)</option>
                         <option value="11" class="bg-slate-800 text-white">ประจำเดือน สิงหาคม (ส.ค.)</option>
                         <option value="12" class="bg-slate-800 text-white">ประจำเดือน กันยายน (ก.ย.)</option>
-                        <option value="YEAREND" class="bg-amber-600 text-white font-bold">★ สรุปภาพรวม ณ สิ้นปีงบประมาณ</option>
                     </select>
                 </div>
 
-                <!-- Select Fiscal Year (FY 2569 only) -->
+                <!-- Select Fiscal Year (FY 2569) -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
                     <label class="text-xs font-medium text-slate-300">ปีงบประมาณ พ.ศ.:</label>
                     <select id="yearSelect" onchange="updateDashboard()" class="bg-transparent text-xs font-prompt text-white focus:outline-none cursor-pointer">
@@ -536,19 +542,19 @@
                 <!-- Fund Doughnut Chart & List Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                     <!-- Doughnut Chart -->
-                    <div class="md:col-span-5 h-48 relative flex items-center justify-center">
+                    <div class="md:col-span-4 h-48 relative flex items-center justify-center">
                         <canvas id="fundDoughnutChart"></canvas>
                     </div>
 
-                    <!-- Fund Usage Detail List -->
-                    <div class="md:col-span-7 space-y-1 max-h-52 overflow-y-auto pr-1 text-xs">
+                    <!-- Fund Usage Detail List (Display all items fully without scrollbars) -->
+                    <div class="md:col-span-8 space-y-1 text-xs">
                         <div id="fundListContainer">
                             <!-- Dynamic Content synced from Sheet 'กองทุน' / 'Fund_Data' -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Total Funds Summary Footer (Exclusively Fund Used & Fund Percent) -->
+                <!-- Total Funds Summary Footer -->
                 <div class="mt-3 pt-2.5 border-t border-slate-700 grid grid-cols-2 gap-3 text-center text-xs">
                     <div class="bg-slate-900/70 p-2 rounded-lg">
                         <span class="text-slate-400 text-[11px]">ทุนสะสมใช้ไปรวม:</span>
@@ -836,17 +842,26 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            checkViewMode();
-            initCharts();
-            updateDashboard();
-            
-            fetchLiveGoogleSheetData();
+        function safeInitDashboard() {
+            try {
+                checkViewMode();
+                initCharts();
+                updateDashboard();
+                fetchLiveGoogleSheetData();
 
-            setInterval(() => {
-                fetchLiveGoogleSheetData(true);
-            }, 30000);
-        });
+                setInterval(() => {
+                    fetchLiveGoogleSheetData(true);
+                }, 30000);
+            } catch (err) {
+                console.error("Dashboard initialization error:", err);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', safeInitDashboard);
+        } else {
+            safeInitDashboard();
+        }
 
         let isLightMode = false;
         
@@ -971,17 +986,23 @@
         }
 
         function parseCSVToObjects(csvText) {
-            const parsed = Papa.parse(csvText, { skipEmptyLines: true });
-            if (!parsed.data || parsed.data.length === 0) return [];
+            let rowsData = [];
+            if (typeof Papa !== 'undefined') {
+                const parsed = Papa.parse(csvText, { skipEmptyLines: true });
+                rowsData = parsed.data || [];
+            } else {
+                rowsData = csvText.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g, '').trim())).filter(r => r.some(c => c !== ''));
+            }
+
+            if (!rowsData || rowsData.length === 0) return [];
 
             let headerRowIdx = -1;
 
-            for (let i = 0; i < Math.min(15, parsed.data.length); i++) {
-                const row = parsed.data[i];
+            for (let i = 0; i < Math.min(15, rowsData.length); i++) {
+                const row = rowsData[i];
                 if (!row) continue;
 
                 const nonCols = row.map(c => String(c || '').trim()).filter(c => c !== '');
-                
                 if (nonCols.length < 2) continue;
 
                 const rowStrLower = nonCols.join(' ').toLowerCase();
@@ -1008,7 +1029,7 @@
 
             if (headerRowIdx === -1) {
                 let maxCols = 0;
-                parsed.data.forEach((r, idx) => {
+                rowsData.forEach((r, idx) => {
                     const count = r.filter(c => String(c || '').trim() !== '').length;
                     if (count > maxCols) {
                         maxCols = count;
@@ -1019,11 +1040,11 @@
 
             if (headerRowIdx === -1) headerRowIdx = 0;
 
-            const headers = parsed.data[headerRowIdx].map(h => String(h || "").trim());
+            const headers = rowsData[headerRowIdx].map(h => String(h || "").trim());
             const resultObjects = [];
 
-            for (let i = headerRowIdx + 1; i < parsed.data.length; i++) {
-                const row = parsed.data[i];
+            for (let i = headerRowIdx + 1; i < rowsData.length; i++) {
+                const row = rowsData[i];
                 if (!row || row.length === 0) continue;
 
                 const obj = {};
@@ -1287,91 +1308,102 @@
         }
 
         function initCharts() {
-            const ctxFin = document.getElementById('financialChart').getContext('2d');
-            financialChartInstance = new Chart(ctxFin, {
-                type: 'bar',
-                data: {
-                    labels: ['สินทรัพย์รวม', 'หนี้สินรวม', 'ทุนรวม'],
-                    datasets: [{
-                        data: [0, 0, 0],
-                        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
-                        borderRadius: 6,
-                        barThickness: 36
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            ticks: {
-                                color: '#94a3b8',
-                                callback: value => (value / 1e9).toFixed(1) + 'B'
-                            },
-                            grid: { color: '#334155' }
-                        },
-                        x: { ticks: { color: '#f8fafc', font: { family: 'Prompt' } }, grid: { display: false } }
-                    }
-                }
-            });
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js library is not available yet.');
+                return;
+            }
 
-            const ctxProfit = document.getElementById('profitChart').getContext('2d');
-            profitChartInstance = new Chart(ctxProfit, {
-                type: 'bar',
-                data: {
-                    labels: ['รายได้รวม', 'ค่าใช้จ่ายรวม', 'กำไรสุทธิ'],
-                    datasets: [{
-                        data: [0, 0, 0],
-                        backgroundColor: ['#10b981', '#0284c7', '#a855f7'],
-                        borderRadius: 6,
-                        barThickness: 36
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            ticks: {
-                                color: '#94a3b8',
-                                callback: value => (value / 1e6).toFixed(0) + 'M'
+            const ctxFin = document.getElementById('financialChart');
+            if (ctxFin) {
+                financialChartInstance = new Chart(ctxFin.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['สินทรัพย์รวม', 'หนี้สินรวม', 'ทุนรวม'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
+                            borderRadius: 6,
+                            barThickness: 36
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: '#94a3b8',
+                                    callback: value => (value / 1e9).toFixed(1) + 'B'
+                                },
+                                grid: { color: '#334155' }
                             },
-                            grid: { color: '#334155' }
-                        },
-                        x: { ticks: { color: '#f8fafc', font: { family: 'Prompt' } }, grid: { display: false } }
+                            x: { ticks: { color: '#f8fafc', font: { family: 'Prompt' } }, grid: { display: false } }
+                        }
                     }
-                }
-            });
+                });
+            }
 
-            const ctxFund = document.getElementById('fundDoughnutChart').getContext('2d');
-            fundDoughnutChartInstance = new Chart(ctxFund, {
-                type: 'doughnut',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: []
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const val = context.raw || 0;
-                                    return ` ${context.label}: ${fmt(val)} บาท`;
+            const ctxProfit = document.getElementById('profitChart');
+            if (ctxProfit) {
+                profitChartInstance = new Chart(ctxProfit.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['รายได้รวม', 'ค่าใช้จ่ายรวม', 'กำไรสุทธิ'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ['#10b981', '#0284c7', '#a855f7'],
+                            borderRadius: 6,
+                            barThickness: 36
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: '#94a3b8',
+                                    callback: value => (value / 1e6).toFixed(0) + 'M'
+                                },
+                                grid: { color: '#334155' }
+                            },
+                            x: { ticks: { color: '#f8fafc', font: { family: 'Prompt' } }, grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            const ctxFund = document.getElementById('fundDoughnutChart');
+            if (ctxFund) {
+                fundDoughnutChartInstance = new Chart(ctxFund.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: []
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const val = context.raw || 0;
+                                        return ` ${context.label}: ${fmt(val)} บาท`;
+                                    }
                                 }
                             }
-                        }
-                    },
-                    cutout: '62%'
-                }
-            });
+                        },
+                        cutout: '62%'
+                    }
+                });
+            }
         }
 
         function calculateFundPercentage(f, netProfit, totalUsed) {
@@ -1395,85 +1427,40 @@
             const yVal = document.getElementById('yearSelect').value;
             const periodEl = document.getElementById('displayPeriod');
 
-            let curData;
-
-            if (mVal === 'YEAREND') {
-                periodEl.innerText = `สรุปภาพรวมผลการดำเนินงาน ณ สิ้นปีงบประมาณ พ.ศ. ${yVal} (ต.ค. 68 - ก.ย. 69)`;
-                
-                // Find latest month with non-zero data in fiscal year 2569 (months 1 to 12)
-                let latestM = 12;
-                for (let m = 12; m >= 1; m--) {
-                    const mData = dbData.monthly[m];
-                    if (mData && (mData.assets > 0 || mData.revenue > 0 || (mData.members && mData.members.grandTot > 0) || (mData.funds && mData.funds.length > 0))) {
-                        latestM = m;
-                        break;
-                    }
-                }
-
-                const monthObj = dbData.monthly[latestM];
-
-                // Aggregate fund data up to latest month
-                const fundAggMap = {};
-                fiscalMonthOrder.forEach(mIdx => {
-                    const mFunds = dbData.monthly[mIdx].funds || [];
-                    mFunds.forEach((f, idx) => {
-                        if (!fundAggMap[f.name]) {
-                            fundAggMap[f.name] = {
-                                name: f.name,
-                                brought: f.brought,
-                                used: f.used,
-                                subItems: f.subItems || [],
-                                color: f.color || fundColorsPalette[idx % fundColorsPalette.length]
-                            };
-                        } else {
-                            if (f.used > fundAggMap[f.name].used) {
-                                fundAggMap[f.name].used = f.used;
-                            }
-                            if (f.brought > fundAggMap[f.name].brought) {
-                                fundAggMap[f.name].brought = f.brought;
-                            }
-                            if (f.subItems && f.subItems.length > 0) {
-                                fundAggMap[f.name].subItems = f.subItems;
-                            }
-                        }
-                    });
-                });
-
-                const yearEndFunds = Object.values(fundAggMap);
-
-                curData = {
-                    assets: monthObj.assets,
-                    liabilities: monthObj.liabilities,
-                    equity: monthObj.equity,
-                    revenue: monthObj.revenue,
-                    expenses: monthObj.expenses,
-                    netProfit: monthObj.netProfit,
-                    members: monthObj.members,
-                    funds: yearEndFunds.length > 0 ? yearEndFunds : monthObj.funds
-                };
-            } else {
-                const monthIdx = parseInt(mVal);
-                const monthObj = dbData.monthly[monthIdx];
-                
-                const calYear = (monthIdx <= 3) ? (parseInt(yVal) - 1) : parseInt(yVal);
+            const monthIdx = parseInt(mVal);
+            const monthObj = dbData.monthly[monthIdx] || dbData.monthly[9];
+            
+            const calYear = (monthIdx <= 3) ? (parseInt(yVal) - 1) : parseInt(yVal);
+            if (periodEl) {
                 periodEl.innerText = `ประจำเดือน ${monthObj.monthName} ${calYear} (ปีงบประมาณ ${yVal})`;
-                curData = monthObj;
+            }
+            const curData = monthObj;
+
+            // Update Financial Cards
+            const elAssets = document.getElementById('valAssets');
+            const elLiab = document.getElementById('valLiabilities');
+            const elEq = document.getElementById('valEquity');
+            const elRev = document.getElementById('valRevenue');
+            const elExp = document.getElementById('valExpenses');
+            const elProfit = document.getElementById('valNetProfit');
+
+            if (elAssets) elAssets.innerText = fmt(curData.assets);
+            if (elLiab) elLiab.innerText = fmt(curData.liabilities);
+            if (elEq) elEq.innerText = fmt(curData.equity);
+            
+            if (elRev) elRev.innerText = fmt(curData.revenue);
+            if (elExp) elExp.innerText = fmt(curData.expenses);
+            if (elProfit) elProfit.innerText = fmt(curData.netProfit);
+
+            if (financialChartInstance) {
+                financialChartInstance.data.datasets[0].data = [curData.assets, curData.liabilities, curData.equity];
+                financialChartInstance.update();
             }
 
-            // Update Financial Cards & Charts
-            document.getElementById('valAssets').innerText = fmt(curData.assets);
-            document.getElementById('valLiabilities').innerText = fmt(curData.liabilities);
-            document.getElementById('valEquity').innerText = fmt(curData.equity);
-            
-            document.getElementById('valRevenue').innerText = fmt(curData.revenue);
-            document.getElementById('valExpenses').innerText = fmt(curData.expenses);
-            document.getElementById('valNetProfit').innerText = fmt(curData.netProfit);
-
-            financialChartInstance.data.datasets[0].data = [curData.assets, curData.liabilities, curData.equity];
-            financialChartInstance.update();
-
-            profitChartInstance.data.datasets[0].data = [curData.revenue, curData.expenses, curData.netProfit];
-            profitChartInstance.update();
+            if (profitChartInstance) {
+                profitChartInstance.data.datasets[0].data = [curData.revenue, curData.expenses, curData.netProfit];
+                profitChartInstance.update();
+            }
 
             // Update Members Table
             const mem = curData.members;
@@ -1523,67 +1510,70 @@
             const fundColors = [];
 
             const listContainer = document.getElementById('fundListContainer');
-            listContainer.innerHTML = '';
+            if (listContainer) {
+                listContainer.innerHTML = '';
 
-            if (!curData.funds || curData.funds.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center text-slate-400 py-8 font-prompt text-xs">
-                        <i class="fa-solid fa-database text-lg mb-1 block text-slate-500"></i>
-                        ยังไม่มีข้อมูลทุนสะสมจาก Google Sheets ในงวดนี้
-                    </div>`;
-            } else {
-                curData.funds.forEach(f => {
-                    totalBrought += f.brought;
-                    totalUsed += f.used;
-                });
+                if (!curData.funds || curData.funds.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="text-center text-slate-400 py-8 font-prompt text-xs">
+                            <i class="fa-solid fa-database text-lg mb-1 block text-slate-500"></i>
+                            ยังไม่มีข้อมูลทุนสะสมจาก Google Sheets ในงวดนี้
+                        </div>`;
+                } else {
+                    curData.funds.forEach(f => {
+                        totalBrought += f.brought;
+                        totalUsed += f.used;
+                    });
 
-                curData.funds.forEach(f => {
-                    const pctInfo = calculateFundPercentage(f, curData.netProfit, totalUsed);
-                    const pct = pctInfo.pct;
-                    const pctTypeLabel = pctInfo.label;
+                    curData.funds.forEach(f => {
+                        const pctInfo = calculateFundPercentage(f, curData.netProfit, totalUsed);
+                        const pct = pctInfo.pct;
+                        const pctTypeLabel = pctInfo.label;
 
-                    fundLabels.push(f.name);
-                    fundUsedData.push(f.used);
-                    fundColors.push(f.color);
+                        fundLabels.push(f.name);
+                        fundUsedData.push(f.used);
+                        fundColors.push(f.color);
 
-                    let subItemsHtml = '';
-                    if (f.subItems && f.subItems.length > 0) {
-                        subItemsHtml = `<div class="mt-1 space-y-1 pl-4 border-l-2 border-slate-700 ml-1.5">`;
-                        f.subItems.forEach(sub => {
-                            const subPct = f.used > 0 ? ((sub.used / f.used) * 100).toFixed(1) : '0.0';
-                            subItemsHtml += `
-                                <div class="flex items-center justify-between text-[10px] text-slate-300 py-0.5 hover:text-white transition">
-                                    <span class="truncate"><i class="fa-solid fa-angle-right text-[9px] text-amber-400/80 mr-1"></i>${sub.name}</span>
-                                    <div class="text-right flex-shrink-0 font-mono">
-                                        <span class="font-semibold text-slate-200">${fmt(sub.used)}</span>
-                                        <span class="text-amber-300/80 ml-1" title="% ของหมวดกองทุนหลัก">(${subPct}%)</span>
+                        let subItemsHtml = '';
+                        if (f.subItems && f.subItems.length > 0) {
+                            subItemsHtml = `<div class="mt-1 space-y-1 pl-4 border-l-2 border-slate-700 ml-1.5">`;
+                            f.subItems.forEach(sub => {
+                                const subPct = f.used > 0 ? ((sub.used / f.used) * 100).toFixed(1) : '0.0';
+                                subItemsHtml += `
+                                    <div class="flex items-center justify-between text-[10px] text-slate-300 py-0.5 hover:text-white transition">
+                                        <span class="truncate"><i class="fa-solid fa-angle-right text-[9px] text-amber-400/80 mr-1"></i>${sub.name}</span>
+                                        <div class="text-right flex-shrink-0 font-mono">
+                                            <span class="font-semibold text-slate-200">${fmt(sub.used)}</span>
+                                            <span class="text-amber-300/80 ml-1" title="% ของหมวดกองทุนหลัก">(${subPct}%)</span>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            subItemsHtml += `</div>`;
+                        }
+
+                        const rowHtml = `
+                            <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 hover:border-slate-600 transition mb-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2 truncate pr-2" title="${pctTypeLabel}">
+                                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${f.color}"></span>
+                                        <span class="text-slate-100 truncate font-semibold text-[11px]">${f.name}</span>
+                                    </div>
+                                    <div class="text-right flex-shrink-0 font-mono text-[11px]">
+                                        <span class="text-white font-bold">${fmt(f.used)}</span>
+                                        <span class="text-amber-400 font-semibold ml-1" title="${pctTypeLabel}">(${pct}%)</span>
                                     </div>
                                 </div>
-                            `;
-                        });
-                        subItemsHtml += `</div>`;
-                    }
-
-                    const rowHtml = `
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-700/50 hover:border-slate-600 transition mb-1">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-2 truncate pr-2" title="${pctTypeLabel}">
-                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${f.color}"></span>
-                                    <span class="text-slate-100 truncate font-semibold text-[11px]">${f.name}</span>
-                                </div>
-                                <div class="text-right flex-shrink-0 font-mono text-[11px]">
-                                    <span class="text-white font-bold">${fmt(f.used)}</span>
-                                    <span class="text-amber-400 font-semibold ml-1" title="${pctTypeLabel}">(${pct}%)</span>
-                                </div>
+                                ${subItemsHtml}
                             </div>
-                            ${subItemsHtml}
-                        </div>
-                    `;
-                    listContainer.insertAdjacentHTML('beforeend', rowHtml);
-                });
+                        `;
+                        listContainer.insertAdjacentHTML('beforeend', rowHtml);
+                    });
+                }
             }
 
-            document.getElementById('totalFundUsed').innerText = fmt(totalUsed);
+            const elTotalFundUsed = document.getElementById('totalFundUsed');
+            if (elTotalFundUsed) elTotalFundUsed.innerText = fmt(totalUsed);
             
             let overallPct = '0.00';
             if (totalUsed > 0) {
@@ -1591,19 +1581,23 @@
             } else if (totalBrought > 0) {
                 overallPct = ((totalUsed / totalBrought) * 100).toFixed(2);
             }
-            document.getElementById('totalFundPercent').innerText = `${overallPct}%`;
+            
+            const elTotalFundPct = document.getElementById('totalFundPercent');
+            if (elTotalFundPct) elTotalFundPct.innerText = `${overallPct}%`;
 
-            fundDoughnutChartInstance.data.labels = fundLabels;
-            fundDoughnutChartInstance.data.datasets[0].data = fundUsedData;
-            fundDoughnutChartInstance.data.datasets[0].backgroundColor = fundColors;
-            fundDoughnutChartInstance.update();
+            if (fundDoughnutChartInstance) {
+                fundDoughnutChartInstance.data.labels = fundLabels;
+                fundDoughnutChartInstance.data.datasets[0].data = fundUsedData;
+                fundDoughnutChartInstance.data.datasets[0].backgroundColor = fundColors;
+                fundDoughnutChartInstance.update();
+            }
         }
 
         // Modal Form Handlers
         function openSheetModal() {
             const mVal = document.getElementById('monthSelect').value;
-            const monthIdx = mVal === 'YEAREND' ? 9 : parseInt(mVal);
-            const monthObj = dbData.monthly[monthIdx];
+            const monthIdx = parseInt(mVal);
+            const monthObj = dbData.monthly[monthIdx] || dbData.monthly[9];
 
             document.getElementById('inputAssets').value = monthObj.assets;
             document.getElementById('inputLiabilities').value = monthObj.liabilities;
@@ -1637,8 +1631,8 @@
 
         function saveLiveSheetData() {
             const mVal = document.getElementById('monthSelect').value;
-            const monthIdx = mVal === 'YEAREND' ? 9 : parseInt(mVal);
-            const monthObj = dbData.monthly[monthIdx];
+            const monthIdx = parseInt(mVal);
+            const monthObj = dbData.monthly[monthIdx] || dbData.monthly[9];
 
             monthObj.assets = parseFloat(document.getElementById('inputAssets').value) || 0;
             monthObj.liabilities = parseFloat(document.getElementById('inputLiabilities').value) || 0;
