@@ -61,7 +61,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
-                font-size: 13.5px !important;
+                font-size: 13px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -75,10 +75,10 @@
                 margin: 0 !important;
             }
             .grid {
-                gap: 8px !important;
+                gap: 6px !important;
             }
             .mb-5 {
-                margin-bottom: 8px !important;
+                margin-bottom: 6px !important;
             }
             
             /* Banner Print Styling */
@@ -86,8 +86,8 @@
                 background: #f8fafc !important;
                 color: #0f172a !important;
                 border: 2px solid #3b82f6 !important;
-                padding: 12px 16px !important;
-                margin-bottom: 8px !important;
+                padding: 10px 14px !important;
+                margin-bottom: 6px !important;
                 border-radius: 8px !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -98,19 +98,19 @@
                 box-shadow: none !important;
             }
             .banner-card h2 {
-                font-size: 26px !important;
-                line-height: 1.3 !important;
+                font-size: 24px !important;
+                line-height: 1.2 !important;
             }
             .banner-card #displayPeriod {
-                font-size: 18px !important;
-                margin-top: 4px !important;
+                font-size: 16px !important;
+                margin-top: 2px !important;
             }
             .banner-card .text-right p:nth-of-type(1) {
-                font-size: 15px !important;
+                font-size: 14px !important;
                 margin-bottom: 2px !important;
             }
             .banner-card .text-right p:nth-of-type(2) {
-                font-size: 17px !important;
+                font-size: 15px !important;
             }
             .banner-card .absolute {
                 display: none !important;
@@ -145,10 +145,10 @@
             }
             .mt-3.pt-2\.5.border-t.grid > div p:first-child,
             .mt-3.pt-2\.5.border-t.grid > div span:first-child {
-                font-size: 15px !important;
+                font-size: 14px !important;
                 font-weight: 700 !important;
                 color: #4c1d95 !important;
-                margin-bottom: 4px !important;
+                margin-bottom: 2px !important;
             }
             .mt-3.pt-2\.5.border-t.grid > div p:last-child {
                 font-size: 17px !important;
@@ -156,20 +156,33 @@
             }
             
             /* Enlarge Text Overrides for Print */
-            .text-\[10px\] { font-size: 12px !important; }
-            .text-\[11px\] { font-size: 13px !important; }
+            .text-\[10px\] { font-size: 11px !important; }
+            .text-\[11px\] { font-size: 12px !important; }
             
             /* Ensure charts fit inside A4 landscape cards */
             .h-56, .h-48 {
-                height: 145px !important;
+                height: 130px !important;
             }
             canvas {
-                max-height: 145px !important;
+                max-height: 130px !important;
                 width: 100% !important;
             }
             .max-h-52, .max-h-56 {
                 max-height: none !important;
                 overflow: visible !important;
+            }
+
+            /* Compress List Spacing */
+            #fundListContainer > div {
+                padding: 4px !important;
+                margin-bottom: 2px !important;
+            }
+            #fundListContainer .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 1px !important;
+            }
+            #fundListContainer .py-0\.5 {
+                padding-top: 1px !important;
+                padding-bottom: 1px !important;
             }
 
             /* Enforce Grid in Print */
