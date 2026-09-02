@@ -65,7 +65,7 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .no-print {
+            header, .no-print {
                 display: none !important;
             }
             .pdf-container {
@@ -76,6 +76,9 @@
             }
             .grid {
                 gap: 8px !important;
+            }
+            .mb-5 {
+                margin-bottom: 8px !important;
             }
             
             /* Banner Print Styling */
@@ -112,6 +115,9 @@
             }
             
             /* Ensure charts fit inside A4 landscape cards */
+            .h-56, .h-48 {
+                height: 125px !important;
+            }
             canvas {
                 max-height: 125px !important;
                 width: 100% !important;
@@ -121,6 +127,26 @@
                 overflow: visible !important;
             }
 
+            /* Enforce Grid in Print */
+            .grid-cols-1.lg\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+            .grid-cols-1.lg\:grid-cols-12, .grid-cols-1.md\:grid-cols-12 {
+                grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+            }
+            .lg\:col-span-5 {
+                grid-column: span 5 / span 5 !important;
+            }
+            .lg\:col-span-7 {
+                grid-column: span 7 / span 7 !important;
+            }
+            .md\:col-span-4 {
+                grid-column: span 4 / span 4 !important;
+            }
+            .md\:col-span-8 {
+                grid-column: span 8 / span 8 !important;
+            }
+            
             /* Compact Table Print View */
             table th, table td {
                 padding: 2px 4px !important;
@@ -355,7 +381,7 @@
                     </p>
                 </div>
                 <div class="text-right border-l-0 md:border-l border-purple-700/50 pl-0 md:pl-5">
-                    <a id="sheetLinkBtn" href="https://docs.google.com/spreadsheets/d/10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU/edit?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white font-semibold px-3 py-1 rounded-lg mb-1 transition shadow">
+                    <a id="sheetLinkBtn" href="https://docs.google.com/spreadsheets/d/10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU/edit?usp=sharing" target="_blank" class="no-print inline-flex items-center space-x-2 text-xs bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white font-semibold px-3 py-1 rounded-lg mb-1 transition shadow">
                         <i class="fa-solid fa-file-excel"></i>
                         <span>เปิดไฟล์ Google Sheet ต้นทาง</span>
                         <i class="fa-solid fa-up-right-from-square text-[10px]"></i>
