@@ -53,7 +53,7 @@
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 4mm 5mm;
+                margin: 2mm !important;
             }
             html, body {
                 background-color: #ffffff !important;
@@ -61,7 +61,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
-                font-size: 13px !important;
+                font-size: 11.5px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -75,10 +75,10 @@
                 margin: 0 !important;
             }
             .grid {
-                gap: 6px !important;
+                gap: 4px !important;
             }
             .mb-5 {
-                margin-bottom: 6px !important;
+                margin-bottom: 4px !important;
             }
             
             /* Banner Print Styling */
@@ -86,11 +86,13 @@
                 background: #f8fafc !important;
                 color: #0f172a !important;
                 border: 2px solid #3b82f6 !important;
-                padding: 10px 14px !important;
-                margin-bottom: 6px !important;
+                padding: 8px 12px !important;
+                margin-bottom: 4px !important;
                 border-radius: 8px !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                display: flex !important;
+                align-items: center !important;
             }
             .banner-card * {
                 color: #0f172a !important;
@@ -98,19 +100,19 @@
                 box-shadow: none !important;
             }
             .banner-card h2 {
-                font-size: 24px !important;
+                font-size: 22px !important;
                 line-height: 1.2 !important;
             }
             .banner-card #displayPeriod {
-                font-size: 16px !important;
+                font-size: 14px !important;
                 margin-top: 2px !important;
             }
             .banner-card .text-right p:nth-of-type(1) {
-                font-size: 14px !important;
+                font-size: 13px !important;
                 margin-bottom: 2px !important;
             }
             .banner-card .text-right p:nth-of-type(2) {
-                font-size: 15px !important;
+                font-size: 14px !important;
             }
             .banner-card .absolute {
                 display: none !important;
@@ -161,10 +163,10 @@
             
             /* Ensure charts fit inside A4 landscape cards */
             .h-56, .h-48 {
-                height: 130px !important;
+                height: 115px !important;
             }
             canvas {
-                max-height: 130px !important;
+                max-height: 115px !important;
                 width: 100% !important;
             }
             .max-h-52, .max-h-56 {
