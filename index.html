@@ -389,11 +389,12 @@
                     </select>
                 </div>
 
-                <!-- Select Fiscal Year (FY 2569) -->
+                <!-- Select Fiscal Year -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5">
                     <label class="text-xs font-medium text-slate-300">ปีงบประมาณ พ.ศ.:</label>
-                    <select id="yearSelect" onchange="updateDashboard()" class="bg-transparent text-xs font-prompt text-white focus:outline-none cursor-pointer">
+                    <select id="yearSelect" onchange="onYearChange()" class="bg-transparent text-xs font-prompt text-white focus:outline-none cursor-pointer">
                         <option value="2569" class="bg-slate-800" selected>2569 (ต.ค. 68 - ก.ย. 69)</option>
+                        <option value="2570" class="bg-slate-800">2570 (ต.ค. 69 - ก.ย. 70)</option>
                     </select>
                 </div>
 
@@ -413,6 +414,12 @@
                     <i class="fa-solid fa-gear text-amber-400"></i>
                     <span>แก้ไขข้อมูล</span>
                 </button>
+
+                <!-- Member Search Navigation Button -->
+                <a href="member_search.html" class="bg-blue-700 hover:bg-blue-600 text-white font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-1.5 shadow border border-blue-500/40" title="ระบบสืบค้นและจัดการทะเบียนสมาชิก">
+                    <i class="fa-solid fa-address-book text-amber-300"></i>
+                    <span>สืบค้นทะเบียนสมาชิก</span>
+                </a>
 
                 <!-- Share Member Link Button (Admin Only) -->
                 <button id="btnShareMember" onclick="copyMemberLink()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-prompt text-xs px-3 py-2 rounded-lg transition duration-200 flex items-center space-x-1.5 shadow" title="คัดลอกลิงก์ส่งให้สมาชิกดูได้อย่างเดียว">
@@ -452,9 +459,10 @@
                     <h2 class="text-xl md:text-2xl font-bold font-prompt text-white tracking-wide drop-shadow-md">
                         สรุปผลการดำเนินงาน สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด
                     </h2>
-                    <p class="text-amber-400 font-prompt text-base font-semibold mt-0.5 drop-shadow" id="displayPeriod">
+                    <p class="text-amber-400 font-prompt text-base font-semibold mt-0.5 drop-shadow flex items-center flex-wrap gap-2" id="displayPeriod">
                         ประจำเดือนมิถุนายน 2569 (ปีงบประมาณ 2569)
                     </p>
+                    <div id="noDataNotice" class="hidden no-print"></div>
                 </div>
                 <div class="text-right border-l-0 md:border-l border-purple-700/50 pl-0 md:pl-5">
                     <a id="sheetLinkBtn" href="https://docs.google.com/spreadsheets/d/10KjTZgBaoa_7HcTU4-GNtOcU4NXHG5cInWodU71-6DU/edit?usp=sharing" target="_blank" class="no-print inline-flex items-center space-x-2 text-xs bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/50 text-white font-semibold px-3 py-1 rounded-lg mb-1 transition shadow">
@@ -808,11 +816,10 @@
             "กันยายน": 12, "ก.ย.": 12, "ก.ย": 12, "september": 12, "sep": 12
         };
 
-        // Database storage
-        const dbData = {
-            monthly: {}
-        };
+        // Discovered fiscal years set
+        const discoveredYears = new Set(["2569", "2570"]);
 
+        // Month Names
         const monthNames = [
             "", 
             "ตุลาคม", "พฤศจิกายน", "ธันวาคม", 
@@ -821,33 +828,78 @@
             "กรกฎาคม", "สิงหาคม", "กันยายน"
         ];
 
-        for(let m = 1; m <= 12; m++) {
-            dbData.monthly[m] = {
-                monthName: monthNames[m],
-                assets: 0,
-                liabilities: 0,
-                equity: 0,
-                revenue: 0,
-                expenses: 0,
-                netProfit: 0,
-                members: {
-                    regTotal: 0,
-                    assocTotal: 0,
-                    grandTot: 0
-                },
-                funds: []
-            };
+        // Database storage with multi-year support
+        const dbData = {
+            years: {},
+            get monthly() {
+                const yEl = document.getElementById('yearSelect');
+                const activeYear = (yEl && yEl.value) ? yEl.value : "2569";
+                return getOrCreateYearData(activeYear).monthly;
+            }
+        };
+
+        function getOrCreateYearData(yearStr) {
+            const y = String(yearStr || "2569").trim();
+            if (!dbData.years[y]) {
+                dbData.years[y] = { monthly: {} };
+                for(let m = 1; m <= 12; m++) {
+                    dbData.years[y].monthly[m] = {
+                        monthName: monthNames[m],
+                        fiscalYear: y,
+                        assets: 0,
+                        liabilities: 0,
+                        equity: 0,
+                        revenue: 0,
+                        expenses: 0,
+                        netProfit: 0,
+                        members: {
+                            regTotal: 0,
+                            assocTotal: 0,
+                            grandTot: 0
+                        },
+                        funds: []
+                    };
+                }
+            }
+            return dbData.years[y];
         }
 
-        // Default initial data for Month 9 (June 2569) matching Google Sheet
-        dbData.monthly[9].assets = 1946649272.99;
-        dbData.monthly[9].liabilities = 864721880.80;
-        dbData.monthly[9].equity = 1081927392.19;
-        dbData.monthly[9].revenue = 75728913.51;
-        dbData.monthly[9].expenses = 17172659.57;
-        dbData.monthly[9].netProfit = 58556253.94;
-        dbData.monthly[9].members = { regTotal: 1683, assocTotal: 206, grandTot: 1889 };
-        dbData.monthly[9].funds = [
+        // Initialize default years
+        getOrCreateYearData("2569");
+        getOrCreateYearData("2570");
+
+        // Default initial data for FY 2570 Month 1 (October 2569) matching Google Sheet
+        const init2570M1 = dbData.years["2570"].monthly[1];
+        init2570M1.assets = 2023632885.65;
+        init2570M1.liabilities = 910918077.39;
+        init2570M1.equity = 1112714808.26;
+        init2570M1.revenue = 7474443.91;
+        init2570M1.expenses = 1874076.90;
+        init2570M1.netProfit = 5600367.01;
+        init2570M1.members = { regTotal: 0, assocTotal: 0, grandTot: 0 };
+        init2570M1.funds = [];
+
+        // Default initial data for FY 2569 Month 12 (September 2569) matching Google Sheet
+        const init2569M12 = dbData.years["2569"].monthly[12];
+        init2569M12.assets = 2020830223.75;
+        init2569M12.liabilities = 916133562.50;
+        init2569M12.equity = 1104696661.25;
+        init2569M12.revenue = 104856999.17;
+        init2569M12.expenses = 26169384.60;
+        init2569M12.netProfit = 78687614.57;
+        init2569M12.members = { regTotal: 1685, assocTotal: 232, grandTot: 1917 };
+        init2569M12.funds = [];
+
+        // Default initial data for FY 2569 Month 9 (June 2569) matching Google Sheet
+        const init2569M9 = dbData.years["2569"].monthly[9];
+        init2569M9.assets = 1946649272.99;
+        init2569M9.liabilities = 864721880.80;
+        init2569M9.equity = 1081927392.19;
+        init2569M9.revenue = 75728913.51;
+        init2569M9.expenses = 17172659.57;
+        init2569M9.netProfit = 58556253.94;
+        init2569M9.members = { regTotal: 1683, assocTotal: 206, grandTot: 1889 };
+        init2569M9.funds = [
             {
                 name: "กองทุนสงเคราะห์สวัสดิการสมาชิก",
                 brought: 0,
@@ -948,6 +1000,7 @@
             try {
                 checkViewMode();
                 initCharts();
+                updateMonthSelectLabels("2569");
                 updateDashboard();
                 fetchLiveGoogleSheetData();
 
@@ -1042,6 +1095,8 @@
                             
                             setTimeout(() => {
                                 if (syncIcon) syncIcon.classList.remove('fa-spin');
+                                updateYearSelectOptions(Array.from(discoveredYears));
+                                updateMonthSelectLabels(document.getElementById('yearSelect').value);
                                 updateDashboard();
                             }, 500);
                             return;
@@ -1083,6 +1138,8 @@
 
             setTimeout(() => {
                 if (syncIcon) syncIcon.classList.remove('fa-spin');
+                updateYearSelectOptions(Array.from(discoveredYears));
+                updateMonthSelectLabels(document.getElementById('yearSelect').value);
                 updateDashboard();
             }, 600);
         }
@@ -1090,10 +1147,31 @@
         function parseCSVToObjects(csvText) {
             let rowsData = [];
             if (typeof Papa !== 'undefined') {
-                const parsed = Papa.parse(csvText, { skipEmptyLines: true });
-                rowsData = parsed.data || [];
-            } else {
-                rowsData = csvText.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g, '').trim())).filter(r => r.some(c => c !== ''));
+                try {
+                    const parsed = Papa.parse(csvText, { skipEmptyLines: true });
+                    rowsData = parsed.data || [];
+                } catch(e) {
+                    console.warn("PapaParse note, fallback to RFC 4180 parser:", e);
+                }
+            }
+            if (!rowsData || rowsData.length === 0) {
+                // High-performance robust RFC 4180 CSV parser (handles commas inside numbers & quotes properly)
+                const arr = [];
+                let quote = false;
+                let col = 0, row = 0;
+                for (let c = 0; c < csvText.length; c++) {
+                    let cc = csvText[c], nc = csvText[c+1];
+                    arr[row] = arr[row] || [];
+                    arr[row][col] = arr[row][col] || '';
+                    if (cc === '"' && quote && nc === '"') { arr[row][col] += '"'; ++c; continue; }
+                    if (cc === '"') { quote = !quote; continue; }
+                    if (cc === ',' && !quote) { ++col; continue; }
+                    if (cc === '\r' && nc === '\n' && !quote) { ++row; col = 0; ++c; continue; }
+                    if (cc === '\n' && !quote) { ++row; col = 0; continue; }
+                    if (cc === '\r' && !quote) { ++row; col = 0; continue; }
+                    arr[row][col] += cc;
+                }
+                rowsData = arr.filter(r => r && r.some(c => String(c || '').trim() !== ''));
             }
 
             if (!rowsData || rowsData.length === 0) return [];
@@ -1170,13 +1248,25 @@
             const keys = Object.keys(rows[0]);
 
             rows.forEach(r => {
-                const findVal = (...candidates) => {
-                    for (let cand of candidates) {
+                const findValExactOrInclude = (targetCandidates, excludeSubstrings = []) => {
+                    for (let cand of targetCandidates) {
+                        const cleanCand = cand.toLowerCase().replace(/[\s_()]/g, '');
                         for (let k of keys) {
-                            const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
-                            const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
-                            if (cleanKey === cleanCand || cleanKey.includes(cleanCand)) {
-                                if (r[k] !== undefined && r[k] !== null && r[k] !== '') {
+                            const cleanKey = k.trim().toLowerCase().replace(/[\s_()]/g, '');
+                            if (cleanKey === cleanCand) {
+                                if (r[k] !== undefined && r[k] !== null && String(r[k]).trim() !== '') {
+                                    return r[k];
+                                }
+                            }
+                        }
+                    }
+                    for (let cand of targetCandidates) {
+                        const cleanCand = cand.toLowerCase().replace(/[\s_()]/g, '');
+                        for (let k of keys) {
+                            const cleanKey = k.trim().toLowerCase().replace(/[\s_()]/g, '');
+                            const isExcluded = excludeSubstrings.some(ex => cleanKey.includes(ex.toLowerCase().replace(/[\s_()]/g, '')));
+                            if (!isExcluded && cleanKey.includes(cleanCand)) {
+                                if (r[k] !== undefined && r[k] !== null && String(r[k]).trim() !== '') {
                                     return r[k];
                                 }
                             }
@@ -1185,43 +1275,65 @@
                     return null;
                 };
 
+                // 1. Identify Month
                 let targetMonthIdx = null;
-
-                const mNameRaw = findVal('ชื่อเดือน', 'Month_Name');
+                const mNameRaw = findValExactOrInclude(['ชื่อเดือน', 'Month_Name']);
                 if (mNameRaw) {
                     const cleanName = String(mNameRaw).trim();
                     const foundIdx = monthNames.findIndex(n => n && cleanName.includes(n));
-                    if (foundIdx !== -1) {
-                        targetMonthIdx = foundIdx;
-                    }
+                    if (foundIdx !== -1) targetMonthIdx = foundIdx;
                 }
-
                 if (!targetMonthIdx) {
-                    const mRaw = findVal('เดือน (ตัวเลข)', 'Month_No', 'เดือน', 'Month');
-                    if (mRaw) {
-                        targetMonthIdx = parseInt(mRaw);
+                    const mRaw = findValExactOrInclude(['เดือน(ตัวเลข)', 'Month_No', 'เดือน', 'Month'], ['ชื่อเดือน', 'Month_Name']);
+                    if (mRaw) targetMonthIdx = parseInt(mRaw);
+                }
+
+                if (!targetMonthIdx || targetMonthIdx < 1 || targetMonthIdx > 12) return;
+
+                // 2. Identify Fiscal Year (ปีงบประมาณ / ประจำปี)
+                let fiscalYear = null;
+                const fyRaw = findValExactOrInclude(['ประจำปี', 'ปีงบประมาณ', 'ปีงบ', 'Fiscal_Year', 'FiscalYear', 'Fiscal']);
+                if (fyRaw) {
+                    const parsedFY = parseInt(String(fyRaw).replace(/[^0-9]/g, ''));
+                    if (!isNaN(parsedFY) && parsedFY >= 2500 && parsedFY <= 2700) {
+                        fiscalYear = String(parsedFY);
                     }
                 }
 
-                if (targetMonthIdx && targetMonthIdx >= 1 && targetMonthIdx <= 12 && dbData.monthly[targetMonthIdx]) {
-                    const assets = findVal('สินทรัพย์รวม (บาท)', 'สินทรัพย์รวม', 'สินทรัพย์', 'Assets', 'Total_Assets');
-                    const liab = findVal('หนี้สินรวม (บาท)', 'หนี้สินรวม', 'หนี้สิน', 'Liabilities', 'Total_Liabilities');
-                    const eq = findVal('ทุนรวม (บาท)', 'ทุนรวม', 'ทุน', 'Equity', 'Total_Equity');
-                    const rev = findVal('รายได้รวม (บาท)', 'รายได้รวม', 'รายได้', 'Revenue', 'Total_Revenue');
-                    const exp = findVal('ค่าใช้จ่ายรวม (บาท)', 'ค่าใช้จ่ายรวม', 'ค่าใช้จ่าย', 'Expenses', 'Total_Expenses');
-                    const profit = findVal('กำไรสุทธิ (บาท)', 'กำไรสุทธิ', 'กำไร', 'Net_Profit', 'NetProfit');
-
-                    if (assets !== null) dbData.monthly[targetMonthIdx].assets = parseFloat(String(assets).replace(/,/g, '')) || 0;
-                    if (liab !== null) dbData.monthly[targetMonthIdx].liabilities = parseFloat(String(liab).replace(/,/g, '')) || 0;
-                    if (eq !== null) dbData.monthly[targetMonthIdx].equity = parseFloat(String(eq).replace(/,/g, '')) || 0;
-                    if (rev !== null) dbData.monthly[targetMonthIdx].revenue = parseFloat(String(rev).replace(/,/g, '')) || 0;
-                    if (exp !== null) dbData.monthly[targetMonthIdx].expenses = parseFloat(String(exp).replace(/,/g, '')) || 0;
-                    
-                    if (profit !== null) {
-                        dbData.monthly[targetMonthIdx].netProfit = parseFloat(String(profit).replace(/,/g, '')) || (dbData.monthly[targetMonthIdx].revenue - dbData.monthly[targetMonthIdx].expenses);
-                    } else {
-                        dbData.monthly[targetMonthIdx].netProfit = dbData.monthly[targetMonthIdx].revenue - dbData.monthly[targetMonthIdx].expenses;
+                // Fallback: derive from calendar year
+                if (!fiscalYear) {
+                    const yRaw = findValExactOrInclude(['ปี(พ.ศ.)', 'ปีพ.ศ.', 'ปี(พศ)', 'ปี', 'Year'], ['ประจำปี', 'ปีงบประมาณ', 'ปีงบ', 'Fiscal']);
+                    if (yRaw) {
+                        const parsedY = parseInt(String(yRaw).replace(/[^0-9]/g, ''));
+                        if (!isNaN(parsedY) && parsedY >= 2500 && parsedY <= 2700) {
+                            fiscalYear = String((targetMonthIdx <= 3) ? (parsedY + 1) : parsedY);
+                        }
                     }
+                }
+
+                if (!fiscalYear) fiscalYear = "2569";
+
+                discoveredYears.add(fiscalYear);
+                const yearData = getOrCreateYearData(fiscalYear);
+                const mData = yearData.monthly[targetMonthIdx];
+
+                const assets = findValExactOrInclude(['สินทรัพย์รวม(บาท)', 'สินทรัพย์รวม', 'สินทรัพย์', 'Assets', 'Total_Assets']);
+                const liab = findValExactOrInclude(['หนี้สินรวม(บาท)', 'หนี้สินรวม', 'หนี้สิน', 'Liabilities', 'Total_Liabilities']);
+                const eq = findValExactOrInclude(['ทุนรวม(บาท)', 'ทุนรวม', 'ทุน', 'Equity', 'Total_Equity']);
+                const rev = findValExactOrInclude(['รายได้รวม(บาท)', 'รายได้รวม', 'รายได้', 'Revenue', 'Total_Revenue']);
+                const exp = findValExactOrInclude(['ค่าใช้จ่ายรวม(บาท)', 'ค่าใช้จ่ายรวม', 'ค่าใช้จ่าย', 'Expenses', 'Total_Expenses']);
+                const profit = findValExactOrInclude(['กำไรสุทธิ(บาท)', 'กำไรสุทธิ', 'กำไร', 'Net_Profit', 'NetProfit']);
+
+                if (assets !== null) mData.assets = parseFloat(String(assets).replace(/,/g, '')) || 0;
+                if (liab !== null) mData.liabilities = parseFloat(String(liab).replace(/,/g, '')) || 0;
+                if (eq !== null) mData.equity = parseFloat(String(eq).replace(/,/g, '')) || 0;
+                if (rev !== null) mData.revenue = parseFloat(String(rev).replace(/,/g, '')) || 0;
+                if (exp !== null) mData.expenses = parseFloat(String(exp).replace(/,/g, '')) || 0;
+                
+                if (profit !== null) {
+                    mData.netProfit = parseFloat(String(profit).replace(/,/g, '')) || (mData.revenue - mData.expenses);
+                } else {
+                    mData.netProfit = mData.revenue - mData.expenses;
                 }
             });
         }
@@ -1229,41 +1341,37 @@
         function parseFundSheet(rows) {
             if (!rows || rows.length === 0) return;
 
-            const findValInRow = (row, ...candidates) => {
-                const keys = Object.keys(row);
-                for (let cand of candidates) {
-                    const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
-                    for (let k of keys) {
-                        const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
-                        if (cleanKey === cleanCand) {
-                            if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
-                                return row[k];
-                            }
-                        }
-                    }
-                }
-                for (let cand of candidates) {
-                    const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
-                    for (let k of keys) {
-                        const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
-                        if (cleanCand === 'เดือน' && cleanKey.includes('ชื่อเดือน')) continue;
-                        if (cleanKey.includes(cleanCand)) {
-                            if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
-                                return row[k];
-                            }
-                        }
-                    }
-                }
-                return null;
-            };
-
-            const monthFundsMap = {};
+            const yearFundsMap = {};
             let lastSeenMonth = 9;
+            let lastSeenYear = "2569";
 
             rows.forEach(r => {
-                let targetMonthIdx = null;
+                const keys = Object.keys(r);
+                const findValInRow = (candidates, excludeSubstrings = []) => {
+                    for (let cand of candidates) {
+                        const cleanCand = cand.toLowerCase().replace(/[\s_()]/g, '');
+                        for (let k of keys) {
+                            const cleanKey = k.trim().toLowerCase().replace(/[\s_()]/g, '');
+                            if (cleanKey === cleanCand) {
+                                if (r[k] !== undefined && r[k] !== null && String(r[k]).trim() !== '') return r[k];
+                            }
+                        }
+                    }
+                    for (let cand of candidates) {
+                        const cleanCand = cand.toLowerCase().replace(/[\s_()]/g, '');
+                        for (let k of keys) {
+                            const cleanKey = k.trim().toLowerCase().replace(/[\s_()]/g, '');
+                            const isExcluded = excludeSubstrings.some(ex => cleanKey.includes(ex.toLowerCase().replace(/[\s_()]/g, '')));
+                            if (!isExcluded && cleanKey.includes(cleanCand)) {
+                                if (r[k] !== undefined && r[k] !== null && String(r[k]).trim() !== '') return r[k];
+                            }
+                        }
+                    }
+                    return null;
+                };
 
-                const mNameRaw = findValInRow(r, 'ชื่อเดือน', 'Month_Name');
+                let targetMonthIdx = null;
+                const mNameRaw = findValInRow(['ชื่อเดือน', 'Month_Name']);
                 if (mNameRaw) {
                     const cleanName = String(mNameRaw).trim().toLowerCase();
                     for (let key in monthNameToFiscalIdx) {
@@ -1275,7 +1383,7 @@
                 }
 
                 if (!targetMonthIdx) {
-                    const mRaw = findValInRow(r, 'เดือน (ตัวเลข)', 'Month_No', 'เดือน', 'Month');
+                    const mRaw = findValInRow(['เดือน(ตัวเลข)', 'Month_No', 'เดือน', 'Month'], ['ชื่อเดือน', 'Month_Name']);
                     if (mRaw) {
                         const parsedNum = parseInt(mRaw);
                         if (parsedNum >= 1 && parsedNum <= 12) targetMonthIdx = parsedNum;
@@ -1288,16 +1396,44 @@
                     targetMonthIdx = lastSeenMonth;
                 }
 
-                const fname = findValInRow(r, 'ชื่อกองทุน / สวัสดิการ', 'ชื่อกองทุน', 'Fund_Name', 'กองทุน', 'สวัสดิการ', 'Fund');
+                // Fiscal Year
+                let fiscalYear = null;
+                const fyRaw = findValInRow(['ประจำปี', 'ปีงบประมาณ', 'ปีงบ', 'Fiscal_Year', 'FiscalYear', 'Fiscal']);
+                if (fyRaw) {
+                    const parsedFY = parseInt(String(fyRaw).replace(/[^0-9]/g, ''));
+                    if (!isNaN(parsedFY) && parsedFY >= 2500 && parsedFY <= 2700) {
+                        fiscalYear = String(parsedFY);
+                    }
+                }
+                if (!fiscalYear) {
+                    const yRaw = findValInRow(['ปี(พ.ศ.)', 'ปีพ.ศ.', 'ปี(พศ)', 'ปี', 'Year'], ['ประจำปี', 'ปีงบประมาณ', 'ปีงบ', 'Fiscal']);
+                    if (yRaw) {
+                        const parsedY = parseInt(String(yRaw).replace(/[^0-9]/g, ''));
+                        if (!isNaN(parsedY) && parsedY >= 2500 && parsedY <= 2700) {
+                            fiscalYear = String((targetMonthIdx <= 3) ? (parsedY + 1) : parsedY);
+                        }
+                    }
+                }
+
+                if (!fiscalYear) {
+                    fiscalYear = lastSeenYear || "2569";
+                } else {
+                    lastSeenYear = fiscalYear;
+                }
+
+                discoveredYears.add(fiscalYear);
+
+                const fname = findValInRow(['ชื่อกองทุน/สวัสดิการ', 'ชื่อกองทุน', 'Fund_Name', 'กองทุน', 'สวัสดิการ', 'Fund']);
 
                 if (targetMonthIdx && targetMonthIdx >= 1 && targetMonthIdx <= 12 && fname) {
-                    if (!monthFundsMap[targetMonthIdx]) monthFundsMap[targetMonthIdx] = [];
+                    if (!yearFundsMap[fiscalYear]) yearFundsMap[fiscalYear] = {};
+                    if (!yearFundsMap[fiscalYear][targetMonthIdx]) yearFundsMap[fiscalYear][targetMonthIdx] = [];
 
                     const cleanFname = String(fname).trim();
-                    const broughtRaw = findValInRow(r, 'ทุนสะสมยกมา (บาท)', 'ทุนสะสมยกมา', 'ทุนยกมา', 'Brought_Forward', 'Brought');
-                    const usedRaw = findValInRow(r, 'ทุนสะสมใช้ไป (บาท)', 'ทุนสะสมใช้ไป', 'ทุนใช้ไป', 'Used_Amount', 'Used');
-                    const pctRaw = findValInRow(r, 'ร้อยละการใช้ทุน (%)', 'ร้อยละการใช้ทุน', 'ร้อยละ', 'Usage_Percent');
-                    const colorRaw = findValInRow(r, 'Color', 'สี');
+                    const broughtRaw = findValInRow(['ทุนสะสมยกมา(บาท)', 'ทุนสะสมยกมา', 'ทุนยกมา', 'Brought_Forward', 'Brought']);
+                    const usedRaw = findValInRow(['ทุนสะสมใช้ไป(บาท)', 'ทุนสะสมใช้ไป', 'ทุนใช้ไป', 'Used_Amount', 'Used']);
+                    const pctRaw = findValInRow(['ร้อยละการใช้ทุน(%)', 'ร้อยละการใช้ทุน', 'ร้อยละ', 'Usage_Percent']);
+                    const colorRaw = findValInRow(['Color', 'สี']);
 
                     const brought = broughtRaw !== null ? (parseFloat(String(broughtRaw).replace(/,/g, '')) || 0) : 0;
                     const used = usedRaw !== null ? (parseFloat(String(usedRaw).replace(/,/g, '')) || 0) : 0;
@@ -1311,11 +1447,10 @@
                     }
 
                     const isSubItem = cleanFname.startsWith('-') || cleanFname.startsWith('•') || cleanFname.startsWith('–');
+                    const fundList = yearFundsMap[fiscalYear][targetMonthIdx];
 
                     if (isSubItem) {
-                        const fundList = monthFundsMap[targetMonthIdx];
                         const subName = cleanFname.replace(/^[-•–]\s*/, '');
-                        
                         if (fundList.length > 0) {
                             const lastParent = fundList[fundList.length - 1];
                             if (!lastParent.subItems) lastParent.subItems = [];
@@ -1334,8 +1469,8 @@
                             });
                         }
                     } else {
-                        const color = colorRaw ? String(colorRaw).trim() : fundColorsPalette[monthFundsMap[targetMonthIdx].length % fundColorsPalette.length];
-                        monthFundsMap[targetMonthIdx].push({
+                        const color = colorRaw ? String(colorRaw).trim() : fundColorsPalette[fundList.length % fundColorsPalette.length];
+                        fundList.push({
                             name: cleanFname,
                             brought: brought,
                             used: used,
@@ -1347,11 +1482,15 @@
                 }
             });
 
-            Object.keys(monthFundsMap).forEach(mStr => {
-                const m = parseInt(mStr);
-                if (dbData.monthly[m] && monthFundsMap[m].length > 0) {
-                    dbData.monthly[m].funds = monthFundsMap[m];
-                }
+            Object.keys(yearFundsMap).forEach(y => {
+                const yearData = getOrCreateYearData(y);
+                discoveredYears.add(y);
+                Object.keys(yearFundsMap[y]).forEach(mStr => {
+                    const m = parseInt(mStr);
+                    if (yearData.monthly[m] && yearFundsMap[y][m].length > 0) {
+                        yearData.monthly[m].funds = yearFundsMap[y][m];
+                    }
+                });
             });
         }
 
@@ -1360,15 +1499,23 @@
             const keys = Object.keys(rows[0]);
 
             rows.forEach(r => {
-                const findVal = (...candidates) => {
-                    for (let cand of candidates) {
+                const findValExactOrInclude = (targetCandidates, excludeSubstrings = []) => {
+                    for (let cand of targetCandidates) {
+                        const cleanCand = cand.toLowerCase().replace(/[\s_()]/g, '');
                         for (let k of keys) {
-                            const cleanKey = k.trim().toLowerCase().replace(/[\s_]/g, '');
-                            const cleanCand = cand.toLowerCase().replace(/[\s_]/g, '');
-                            if (cleanKey === cleanCand || cleanKey.includes(cleanCand)) {
-                                if (r[k] !== undefined && r[k] !== null && r[k] !== '') {
-                                    return r[k];
-                                }
+                            const cleanKey = k.trim().toLowerCase().replace(/[\s_()]/g, '');
+                            if (cleanKey === cleanCand) {
+                                if (r[k] !== undefined && r[k] !== null && String(r[k]).trim() !== '') return r[k];
+                            }
+                        }
+                    }
+                    for (let cand of targetCandidates) {
+                        const cleanCand = cand.toLowerCase().replace(/[\s_()]/g, '');
+                        for (let k of keys) {
+                            const cleanKey = k.trim().toLowerCase().replace(/[\s_()]/g, '');
+                            const isExcluded = excludeSubstrings.some(ex => cleanKey.includes(ex.toLowerCase().replace(/[\s_()]/g, '')));
+                            if (!isExcluded && cleanKey.includes(cleanCand)) {
+                                if (r[k] !== undefined && r[k] !== null && String(r[k]).trim() !== '') return r[k];
                             }
                         }
                     }
@@ -1376,35 +1523,52 @@
                 };
 
                 let targetMonthIdx = null;
-
-                const mNameRaw = findVal('ชื่อเดือน', 'Month_Name');
+                const mNameRaw = findValExactOrInclude(['ชื่อเดือน', 'Month_Name']);
                 if (mNameRaw) {
                     const cleanName = String(mNameRaw).trim();
                     const foundIdx = monthNames.findIndex(n => n && cleanName.includes(n));
-                    if (foundIdx !== -1) {
-                        targetMonthIdx = foundIdx;
-                    }
+                    if (foundIdx !== -1) targetMonthIdx = foundIdx;
                 }
-
                 if (!targetMonthIdx) {
-                    const mRaw = findVal('เดือน (ตัวเลข)', 'Month_No', 'เดือน', 'Month');
+                    const mRaw = findValExactOrInclude(['เดือน(ตัวเลข)', 'Month_No', 'เดือน', 'Month'], ['ชื่อเดือน', 'Month_Name']);
                     if (mRaw) targetMonthIdx = parseInt(mRaw);
                 }
 
-                if (targetMonthIdx && dbData.monthly[targetMonthIdx]) {
-                    const regTot = findVal('รวมสมาชิกสามัญ', 'สมาชิกสามัญ', 'Regular_Total', 'Regular');
-                    const assocTot = findVal('รวมสมาชิกสมทบ', 'สมาชิกสมทบ', 'Associate_Total', 'Associate');
-                    const grandTot = findVal('จำนวนสมาชิกรวมทั้งสิ้น', 'สมาชิกรวมทั้งสิ้น', 'รวมทั้งสิ้น', 'Total_Member', 'Grand_Total');
+                if (!targetMonthIdx || targetMonthIdx < 1 || targetMonthIdx > 12) return;
 
-                    let memObj = dbData.monthly[targetMonthIdx].members;
-
-                    if (regTot !== null) memObj.regTotal = parseInt(String(regTot).replace(/,/g, '')) || 0;
-                    if (assocTot !== null) memObj.assocTotal = parseInt(String(assocTot).replace(/,/g, '')) || 0;
-                    if (grandTot !== null) {
-                        memObj.grandTot = parseInt(String(grandTot).replace(/,/g, '')) || (memObj.regTotal + memObj.assocTotal);
-                    } else {
-                        memObj.grandTot = memObj.regTotal + memObj.assocTotal;
+                let fiscalYear = null;
+                const fyRaw = findValExactOrInclude(['ประจำปี', 'ปีงบประมาณ', 'ปีงบ', 'Fiscal_Year', 'FiscalYear', 'Fiscal']);
+                if (fyRaw) {
+                    const parsedFY = parseInt(String(fyRaw).replace(/[^0-9]/g, ''));
+                    if (!isNaN(parsedFY) && parsedFY >= 2500 && parsedFY <= 2700) {
+                        fiscalYear = String(parsedFY);
                     }
+                }
+                if (!fiscalYear) {
+                    const yRaw = findValExactOrInclude(['ปี(พ.ศ.)', 'ปีพ.ศ.', 'ปี(พศ)', 'ปี', 'Year'], ['ประจำปี', 'ปีงบประมาณ', 'ปีงบ', 'Fiscal']);
+                    if (yRaw) {
+                        const parsedY = parseInt(String(yRaw).replace(/[^0-9]/g, ''));
+                        if (!isNaN(parsedY) && parsedY >= 2500 && parsedY <= 2700) {
+                            fiscalYear = String((targetMonthIdx <= 3) ? (parsedY + 1) : parsedY);
+                        }
+                    }
+                }
+                if (!fiscalYear) fiscalYear = "2569";
+
+                discoveredYears.add(fiscalYear);
+                const yearData = getOrCreateYearData(fiscalYear);
+                const memObj = yearData.monthly[targetMonthIdx].members;
+
+                const regTot = findValExactOrInclude(['รวมสมาชิกสามัญ', 'สมาชิกสามัญ', 'Regular_Total', 'Regular']);
+                const assocTot = findValExactOrInclude(['รวมสมาชิกสมทบ', 'สมาชิกสมทบ', 'Associate_Total', 'Associate']);
+                const grandTot = findValExactOrInclude(['จำนวนสมาชิกรวมทั้งสิ้น', 'สมาชิกรวมทั้งสิ้น', 'รวมทั้งสิ้น', 'Total_Member', 'Grand_Total']);
+
+                if (regTot !== null) memObj.regTotal = parseInt(String(regTot).replace(/,/g, '')) || 0;
+                if (assocTot !== null) memObj.assocTotal = parseInt(String(assocTot).replace(/,/g, '')) || 0;
+                if (grandTot !== null) {
+                    memObj.grandTot = parseInt(String(grandTot).replace(/,/g, '')) || (memObj.regTotal + memObj.assocTotal);
+                } else {
+                    memObj.grandTot = memObj.regTotal + memObj.assocTotal;
                 }
             });
         }
@@ -1524,19 +1688,127 @@
             };
         }
 
+        function getLatestMonthWithData(yearStr) {
+            const yearData = getOrCreateYearData(yearStr);
+            for (let m = 12; m >= 1; m--) {
+                if (yearData.monthly[m] && (yearData.monthly[m].assets > 0 || yearData.monthly[m].revenue > 0)) {
+                    return m;
+                }
+            }
+            return 1;
+        }
+
+        function selectMonth(m) {
+            const mSelect = document.getElementById('monthSelect');
+            if (mSelect) {
+                mSelect.value = String(m);
+                updateDashboard();
+            }
+        }
+
+        function updateMonthSelectLabels(yearStr) {
+            const yVal = yearStr || (document.getElementById('yearSelect') ? document.getElementById('yearSelect').value : "2569");
+            const yearData = getOrCreateYearData(yVal);
+            const mSelect = document.getElementById('monthSelect');
+            if (!mSelect) return;
+
+            const shortThaiMonths = [
+                "", "ต.ค.", "พ.ย.", "ธ.ค.", "ม.ค.", "ก.พ.", "มี.ค.",
+                "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย."
+            ];
+
+            Array.from(mSelect.options).forEach(opt => {
+                const m = parseInt(opt.value);
+                const mObj = yearData.monthly[m];
+                const hasData = mObj && (mObj.assets > 0 || mObj.revenue > 0);
+                const baseName = `ประจำเดือน ${monthNames[m]} (${shortThaiMonths[m]})`;
+                opt.textContent = hasData ? baseName : `${baseName} (รอข้อมูล)`;
+            });
+        }
+
+        function onYearChange() {
+            const yVal = document.getElementById('yearSelect').value;
+            const yearData = getOrCreateYearData(yVal);
+            const mSelect = document.getElementById('monthSelect');
+            const curM = parseInt(mSelect.value);
+
+            // Check if curM has data in this year
+            const hasData = yearData.monthly[curM] && (yearData.monthly[curM].assets > 0 || yearData.monthly[curM].revenue > 0);
+            if (!hasData) {
+                const latestM = getLatestMonthWithData(yVal);
+                if (latestM) {
+                    mSelect.value = String(latestM);
+                }
+            }
+            updateMonthSelectLabels(yVal);
+            updateDashboard();
+        }
+
+        function updateYearSelectOptions(availableYears) {
+            const yearSelect = document.getElementById('yearSelect');
+            if (!yearSelect) return;
+            
+            const currentVal = yearSelect.value || "2569";
+            const allYears = Array.from(new Set([...availableYears, "2569", "2570"]))
+                .filter(y => y && !isNaN(parseInt(y)))
+                .sort((a,b) => parseInt(a) - parseInt(b));
+            
+            const existingOptions = Array.from(yearSelect.options).map(o => o.value);
+            const isSame = allYears.length === existingOptions.length && allYears.every((y, idx) => y === existingOptions[idx]);
+            
+            if (!isSame) {
+                yearSelect.innerHTML = '';
+                allYears.forEach(y => {
+                    const yNum = parseInt(y);
+                    const prevY = String(yNum - 1).slice(-2);
+                    const curY = String(yNum).slice(-2);
+                    const opt = document.createElement('option');
+                    opt.value = y;
+                    opt.className = 'bg-slate-800 text-white';
+                    opt.textContent = `${y} (ต.ค. ${prevY} - ก.ย. ${curY})`;
+                    if (y === currentVal) opt.selected = true;
+                    yearSelect.appendChild(opt);
+                });
+                
+                if (!yearSelect.value && allYears.length > 0) {
+                    yearSelect.value = allYears.includes("2569") ? "2569" : allYears[0];
+                }
+            }
+        }
+
         function updateDashboard() {
             const mVal = document.getElementById('monthSelect').value;
             const yVal = document.getElementById('yearSelect').value;
             const periodEl = document.getElementById('displayPeriod');
 
             const monthIdx = parseInt(mVal);
-            const monthObj = dbData.monthly[monthIdx] || dbData.monthly[9];
+            const yearData = getOrCreateYearData(yVal);
+            const monthObj = yearData.monthly[monthIdx] || yearData.monthly[1];
             
             const calYear = (monthIdx <= 3) ? (parseInt(yVal) - 1) : parseInt(yVal);
             if (periodEl) {
-                periodEl.innerText = `ประจำเดือน ${monthObj.monthName} ${calYear} (ปีงบประมาณ ${yVal})`;
+                periodEl.innerHTML = `<span class="bg-amber-400 text-slate-950 font-bold px-2.5 py-0.5 rounded text-xs shadow-sm">ปีงบประมาณ ${yVal}</span><span>ประจำเดือน ${monthObj.monthName} ${calYear}</span>`;
             }
             const curData = monthObj;
+
+            // Empty Data Notice Check
+            const noDataNotice = document.getElementById('noDataNotice');
+            const hasData = curData.assets > 0 || curData.revenue > 0;
+            if (noDataNotice) {
+                if (!hasData) {
+                    const latestM = getLatestMonthWithData(yVal);
+                    noDataNotice.innerHTML = `
+                        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-300 px-3 py-2 rounded-lg text-xs flex items-center justify-between mt-2 flex-wrap gap-2">
+                            <span><i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-400"></i>งวดประจำเดือน ${monthObj.monthName} ยังไม่มีการบันทึกข้อมูล (0.00 บาท) ในปีงบประมาณ ${yVal}</span>
+                            <button onclick="selectMonth(${latestM})" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded font-semibold cursor-pointer text-xs transition">
+                                <i class="fa-solid fa-calendar-check mr-1"></i>ดูงวดล่าสุดที่มีข้อมูล (${monthNames[latestM]})
+                            </button>
+                        </div>`;
+                    noDataNotice.classList.remove('hidden');
+                } else {
+                    noDataNotice.classList.add('hidden');
+                }
+            }
 
             // Update Financial Cards
             const elAssets = document.getElementById('valAssets');
@@ -1698,8 +1970,10 @@
         // Modal Form Handlers
         function openSheetModal() {
             const mVal = document.getElementById('monthSelect').value;
+            const yVal = document.getElementById('yearSelect').value;
             const monthIdx = parseInt(mVal);
-            const monthObj = dbData.monthly[monthIdx] || dbData.monthly[9];
+            const yearData = getOrCreateYearData(yVal);
+            const monthObj = yearData.monthly[monthIdx] || yearData.monthly[1];
 
             document.getElementById('inputAssets').value = monthObj.assets;
             document.getElementById('inputLiabilities').value = monthObj.liabilities;
@@ -1733,8 +2007,10 @@
 
         function saveLiveSheetData() {
             const mVal = document.getElementById('monthSelect').value;
+            const yVal = document.getElementById('yearSelect').value;
             const monthIdx = parseInt(mVal);
-            const monthObj = dbData.monthly[monthIdx] || dbData.monthly[9];
+            const yearData = getOrCreateYearData(yVal);
+            const monthObj = yearData.monthly[monthIdx] || yearData.monthly[1];
 
             monthObj.assets = parseFloat(document.getElementById('inputAssets').value) || 0;
             monthObj.liabilities = parseFloat(document.getElementById('inputLiabilities').value) || 0;
